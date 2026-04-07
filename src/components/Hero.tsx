@@ -161,7 +161,6 @@ export default function Hero() {
                 className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-base leading-relaxed placeholder:text-white/20 resize-none h-20"
                 defaultValue={DEFAULT_PROMPT}
               />
-              <div className="h-px bg-white/20 w-full" />
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 text-left">
@@ -224,9 +223,9 @@ export default function Hero() {
           )}
 
           <div className="flex justify-center pt-1">
-            <button onClick={() => setLoading(true)} className="gold-btn-glow bg-white text-[#001e40] hover:bg-[#D4AF37] hover:text-white transition-colors duration-300 px-10 py-4 rounded-full font-bold text-sm tracking-[0.2em] uppercase flex items-center gap-3 group">
+            <button onClick={() => setLoading(true)} className="gold-btn-glow bg-white text-[#001e40] hover:bg-[#D4AF37] hover:text-white transition-colors duration-300 px-6 py-2.5 rounded-full font-bold text-xs tracking-[0.2em] uppercase flex items-center gap-2 group">
               Generate My Itinerary
-              <span className="material-symbols-outlined transition-transform group-hover:translate-x-2">
+              <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-1">
                 auto_awesome
               </span>
             </button>
