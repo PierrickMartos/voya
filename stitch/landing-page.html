@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voya | AI-Perfected Luxury Travel</title>
+<!-- Google Fonts: Noto Serif for Editorial, Manrope for UI -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-surface-variant": "#43474f",
+                    "on-primary-fixed-variant": "#1f477b",
+                    "surface": "#f8f9fa",
+                    "tertiary": "#002038",
+                    "inverse-surface": "#2e3132",
+                    "surface-dim": "#d9dadb",
+                    "on-tertiary-container": "#4ca1eb",
+                    "error-container": "#ffdad6",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-variant": "#e1e3e4",
+                    "primary-container": "#003366",
+                    "on-secondary-container": "#745c00",
+                    "on-secondary-fixed": "#241a00",
+                    "secondary-fixed": "#ffe088",
+                    "secondary": "#D4AF37", /* Changed to Gold for accents */
+                    "on-surface": "#191c1d",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#a7c8ff",
+                    "secondary-container": "#fed65b",
+                    "outline-variant": "#c3c6d1",
+                    "surface-container-high": "#e7e8e9",
+                    "secondary-fixed-dim": "#e9c349",
+                    "tertiary-fixed-dim": "#9acbff",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#00365a",
+                    "on-primary-container": "#799dd6",
+                    "surface-bright": "#f8f9fa",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed-variant": "#004a79",
+                    "outline": "#737780",
+                    "on-secondary-fixed-variant": "#574500",
+                    "surface-container-highest": "#e1e3e4",
+                    "primary-fixed-dim": "#a7c8ff",
+                    "tertiary-fixed": "#cfe5ff",
+                    "primary-fixed": "#d5e3ff",
+                    "primary": "#001e40",
+                    "on-primary-fixed": "#001b3c",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#001d34",
+                    "surface-container-lowest": "#ffffff",
+                    "background": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "surface-tint": "#3a5f94",
+                    "on-background": "#191c1d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .hero-video-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%);
+        }
+        .glass-hero {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .text-glow:hover {
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+        .gold-accent {
+            color: #D4AF37;
+        }
+        .gold-btn-glow {
+            box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+            transition: all 0.4s ease;
+        }
+        .gold-btn-glow:hover {
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px) scale(1.02);
+        }
+        .input-underlined {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            transition: border-color 0.3s;
+        }
+        .input-underlined:focus {
+            border-bottom-color: #D4AF37;
+            outline: none;
+            ring: 0;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopNavBar: Transparent & Overlaid -->
+<nav class="fixed top-0 w-full z-50 bg-transparent flex justify-between items-center px-12 py-8 max-w-[1920px] left-1/2 -translate-x-1/2">
+<div class="flex items-center gap-16">
+<a class="text-3xl font-black tracking-tighter text-white font-headline" href="#">Voya</a>
+<div class="hidden lg:flex items-center gap-10">
+<a class="font-headline text-sm tracking-widest uppercase text-white hover:text-secondary transition-colors" href="#">Explore</a>
+<a class="font-headline text-sm tracking-widest uppercase text-white/70 hover:text-white transition-colors" href="#">How it Works</a>
+<a class="font-headline text-sm tracking-widest uppercase text-white/70 hover:text-white transition-colors" href="#">My Trips</a>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<button class="material-symbols-outlined text-white hover:text-secondary transition-colors text-2xl">chat</button>
+<button class="border border-white/30 text-white px-8 py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-white hover:text-primary transition-all duration-300">Get Started</button>
+</div>
+</nav>
+<!-- Full-Screen Video Hero -->
+<section class="relative h-screen w-screen overflow-hidden flex items-center justify-center">
+<!-- Background Asset -->
+<div class="absolute inset-0 z-0">
+<!-- Using high-quality placeholder image for visual impact, system would ideally render a video here -->
+<img class="w-full h-full object-cover scale-105" data-alt="Cinematic aerial view of turquoise waters and lush islands at sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrJkB8oI9MQS_HtcKrLvwSQCQoS-ke20iTGfFBo1TauTa26x0fumdM4RcLsJusEw_eIS4Prso-p5P0ra0pK0PmothmX-YzOFrhvKOGJPqVGbzz-b6E5lmmiqFelqlPLAJ6nymWphhS2imHV3fJYLKcR15X_2WXTcqiWgKc2WJRmIApD-rSdM5I77TkMnXo2OLUEkymArByLAXV-KWWxg5rO11PSTeE3hHJjUz-L1dYU_1h0YMTVZ6bacp2JJFjPk9mlSdG8UC5aC0d"/>
+<div class="absolute inset-0 hero-video-overlay"></div>
+</div>
+<!-- Hero Content Container -->
+<div class="relative z-10 w-full max-w-7xl px-8 flex flex-col items-center text-center">
+<h1 class="font-headline text-6xl md:text-8xl lg:text-9xl font-bold text-white mb-12 leading-[0.9] tracking-tighter">
+            Escape the<br/>
+<span class="italic font-normal gold-accent">Ordinary.</span>
+</h1>
+<!-- Redesigned AI Planner Inputs -->
+<div class="glass-hero p-8 md:p-12 rounded-[40px] w-full max-w-5xl shadow-2xl space-y-10">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 text-left">
+<!-- Who Section -->
+<div class="space-y-3">
+<label class="text-[10px] uppercase tracking-[0.3em] font-bold text-white/50 block">Who are you and with whom are you traveling?</label>
+<textarea class="w-full bg-transparent border-none p-0 focus:ring-0 text-white font-headline text-lg leading-relaxed placeholder:text-white/20 resize-none h-20" placeholder="Describe your group...">My partner and I, we have 37 and 36, we love to travel and discover new beautiful countries and cultures.</textarea>
+<div class="h-px bg-white/20 w-full"></div>
+</div>
+<!-- Where & Vibe Section -->
+<div class="space-y-10">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-3">
+<label class="text-[10px] uppercase tracking-[0.3em] font-bold text-white/50 block">Where to?</label>
+<div class="flex items-center gap-2">
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-white font-headline text-lg placeholder:text-white/20" placeholder="Anywhere in the world..." type="text"/>
+<button class="text-secondary text-[10px] uppercase tracking-widest font-bold whitespace-nowrap hover:text-white transition-colors border border-secondary/30 px-3 py-1 rounded-full">Surprise Me</button>
+</div>
+<div class="h-px bg-white/20 w-full"></div>
+</div>
+<div class="space-y-3">
+<label class="text-[10px] uppercase tracking-[0.3em] font-bold text-white/50 block">The Vibe</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-white font-headline text-lg placeholder:text-white/20" type="text" value="romantic &amp; tourism"/>
+<div class="h-px bg-white/20 w-full"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center pt-4">
+<button class="gold-btn-glow bg-white text-primary px-16 py-6 rounded-full font-bold text-sm tracking-[0.2em] uppercase flex items-center gap-4 transition-all group">
+                    Generate My Itinerary
+                    <span class="material-symbols-outlined transition-transform group-hover:translate-x-2">auto_awesome</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bottom Indicator -->
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-2">
+<span class="text-[10px] uppercase tracking-[0.4em] font-bold">Scroll to Explore</span>
+<div class="w-px h-12 bg-gradient-to-b from-white/40 to-transparent"></div>
+</div>
+</section>
+<!-- The Voya Experience Section -->
+<section class="py-40 px-12 bg-white">
+<div class="max-w-[1440px] mx-auto">
+<div class="flex flex-col lg:flex-row justify-between items-start mb-32 gap-16">
+<div class="max-w-3xl">
+<h2 class="font-headline text-5xl md:text-7xl font-bold text-primary mb-10 leading-tight">The Art of Effortless <br/><span class="italic font-normal">Exploration</span></h2>
+<p class="text-xl text-on-surface-variant leading-relaxed font-light">We combine the intuition of a seasoned travel concierge with the precision of advanced machine learning to curate experiences that resonate with your soul.</p>
+</div>
+<div class="lg:pt-24">
+<a class="text-primary font-bold border-b-2 border-secondary pb-2 flex items-center gap-4 text-lg hover:gap-8 transition-all" href="#">
+                    Our Philosophy <span class="material-symbols-outlined">trending_flat</span>
+</a>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-20">
+<!-- Card 1 -->
+<div class="group">
+<div class="mb-10 w-20 h-20 rounded-3xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+<span class="material-symbols-outlined !text-4xl">psychology</span>
+</div>
+<h3 class="font-headline text-3xl font-bold mb-6">Personalized AI</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed">Our AI doesn't just suggest destinations; it learns your aesthetic, pace, and passions to build a map that feels uniquely yours.</p>
+</div>
+<!-- Card 2 -->
+<div class="group">
+<div class="mb-10 w-20 h-20 rounded-3xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+<span class="material-symbols-outlined !text-4xl">hub</span>
+</div>
+<h3 class="font-headline text-3xl font-bold mb-6">Curated Global Access</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed">Seamless integration with global airlines and boutique hotels, paired with real-time access to exclusive local events.</p>
+</div>
+<!-- Card 3 -->
+<div class="group">
+<div class="mb-10 w-20 h-20 rounded-3xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+<span class="material-symbols-outlined !text-4xl">map</span>
+</div>
+<h3 class="font-headline text-3xl font-bold mb-6">Dynamic Itineraries</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed">Change of plans? Your itinerary adapts in seconds. Voya stays by your side, adjusting routes and bookings as you wander.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Trending Destinations Section -->
+<section class="py-40 bg-surface-container-low overflow-hidden">
+<div class="max-w-[1440px] mx-auto px-12">
+<div class="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+<h2 class="font-headline text-5xl font-bold text-primary">Global Hotspots</h2>
+<div class="flex gap-6">
+<button class="w-16 h-16 rounded-full border border-outline-variant flex items-center justify-center text-primary hover:bg-white hover:shadow-xl transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-16 h-16 rounded-full border border-outline-variant flex items-center justify-center text-primary hover:bg-white hover:shadow-xl transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- Destination Card 1 -->
+<div class="group relative h-[700px] rounded-[40px] overflow-hidden shadow-2xl">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" data-alt="Positano cliffside" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1vIfWz4-XWMzeLJzS7zoJ5l5VgotmxAACrQC32Hj_DpLL3W89R-dVDNUtztWwLwkdLTjkfBS2Yhu9cX4_2l19_pzOOtDBl6RRTAEh7_gOwUaeIowPPo69YyNdw8MotZBgH1HaiOeQliDcAbNmmrfBvK6lmTrwQDefEpD7n1Yuai40RhwmzwlNtUdB-gdsbKon6f9quQC9wVD4Zumn9xjAWpo7HSsdEVtiXgmZUHJ8opGkORNmGubNtQM3xBHz66skfM37MXHDI2aE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-12 w-full">
+<p class="text-secondary text-sm uppercase tracking-[0.4em] font-bold mb-4">Italy</p>
+<h3 class="text-white font-headline text-4xl font-bold mb-8">Amalfi Coast</h3>
+<div class="flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+<button class="bg-white text-primary px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest">Explore</button>
+<div class="text-right">
+<p class="text-white font-bold text-2xl">$3,200+</p>
+<p class="text-white/50 text-[10px] uppercase tracking-widest">From</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Destination Card 2 -->
+<div class="group relative h-[700px] rounded-[40px] overflow-hidden shadow-2xl md:mt-24">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" data-alt="Kyoto pagoda" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQcA96WxGy1VdYpdsu3kbfyVhMx6rl5R9bqkmZc3AqCcZO504nI7jHEp8E5TIxdyKJliT9FBKNgowY61F7X2WN4-COstYC45139S4mrTc2iCvHot7hFkf1hiRAuXEU0IqED8IySaRLljds7xUXyYqupu55Abjs07K1BEzDrleUTuDDzeZlbna-qMIeUT9cBxDAFrX6Do2_fj4bzOBSLaSE5r3YWPaDTbRAelZVS5gpn5W0ltPCE7CUPe5wB1Mg9In5cw7lijB8UKJv"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-12 w-full">
+<p class="text-secondary text-sm uppercase tracking-[0.4em] font-bold mb-4">Japan</p>
+<h3 class="text-white font-headline text-4xl font-bold mb-8">Kyoto Rituals</h3>
+<div class="flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+<button class="bg-white text-primary px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest">Explore</button>
+<div class="text-right">
+<p class="text-white font-bold text-2xl">$4,100+</p>
+<p class="text-white/50 text-[10px] uppercase tracking-widest">From</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Destination Card 3 -->
+<div class="group relative h-[700px] rounded-[40px] overflow-hidden shadow-2xl">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" data-alt="Iceland Highlands" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtJkn9dyJ0sFJjMu7iqv4kpTZRyxsVzHBiuk5gNeSqAcQLVglAtU3H_5mLwnCKP2RcEzb4HohXdL57gmlvDeMLk-itmZ0Fr1rZwi5kCSagj474EL84M49sPuPAGaWdR5iup0PRizvBJ_Xuw7VldDMRR7EpFr4Seh3efBSvRX30R0g3yiL1sSPCBAKcgfTjKf4Tm3Kt3KUOfZSPwwz2-V9LNfS1Rr8lL3suO1GDE8oW17UwR08u8-FtNVQf8hY_kegH5zx2iwOoojrr"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-12 w-full">
+<p class="text-secondary text-sm uppercase tracking-[0.4em] font-bold mb-4">Iceland</p>
+<h3 class="text-white font-headline text-4xl font-bold mb-8">Highland Solitude</h3>
+<div class="flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+<button class="bg-white text-primary px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest">Explore</button>
+<div class="text-right">
+<p class="text-white font-bold text-2xl">$2,800+</p>
+<p class="text-white/50 text-[10px] uppercase tracking-widest">From</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials Section -->
+<section class="py-40 bg-white">
+<div class="max-w-5xl mx-auto px-12 text-center">
+<span class="material-symbols-outlined gold-accent text-6xl mb-12">format_quote</span>
+<div class="space-y-16">
+<div>
+<h2 class="font-headline text-4xl md:text-5xl italic text-primary leading-tight mb-10">"Voya turned our honeymoon from a list of bookmarks into a living, breathing odyssey. The AI's intuition for local dinner spots was uncanny."</h2>
+<p class="font-bold text-primary text-xl">Elena &amp; Marc S.</p>
+<p class="text-on-surface-variant text-sm uppercase tracking-[0.3em] mt-3">Paris to Tokyo Expedition</p>
+</div>
+<div class="w-32 h-px bg-outline-variant/30 mx-auto"></div>
+<div>
+<p class="font-headline text-3xl text-primary leading-relaxed mb-10 font-light">"The only way I travel now. It's like having a world-class concierge in your pocket that knows exactly when you need a quiet coffee and when you're ready for adventure."</p>
+<p class="font-bold text-primary text-xl">Julian V.</p>
+<p class="text-on-surface-variant text-sm uppercase tracking-[0.3em] mt-3">Global Creative Director</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Closing CTA -->
+<section class="px-12 py-32 mb-24">
+<div class="max-w-[1440px] mx-auto relative rounded-[4rem] overflow-hidden bg-primary p-24 md:p-40 text-center">
+<div class="absolute inset-0 opacity-40">
+<img class="w-full h-full object-cover" data-alt="Atmospheric sunset over city" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALs72QlP7YxE2ubkZVh4Ipi9O7Mqb9ScsVD4S7n0l2u0PiflXlCVoxDdpOEdqe-0q8qDOtaZ9NI5Hq1tWzco1CNnmD5Fzk5tJnXtvjxzJAJ2h-5dOuBCvrEl68BzDgxNSC_cA9EsWngYU0VpyBFIUiI1SKrst8I2R_QdWui5-akFfdNcXSRc6L_sdUnWx-PTSxEizdUBVmDkfgbgJr2tMyJReP8w2fUhxKRMzMpnMLr619yozdiyMS7BlSCIFdnac4Jztty9KzLgoC"/>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<h2 class="font-headline text-6xl md:text-8xl font-bold text-white mb-12">Ready to Escape?</h2>
+<p class="text-white/70 text-2xl max-w-2xl mb-16 font-light leading-relaxed">Join thousands of travelers who have redefined their relationship with the world. Your perfect journey is one click away.</p>
+<div class="flex flex-col md:flex-row gap-8">
+<button class="gold-btn-glow bg-secondary text-primary px-16 py-6 rounded-full font-bold text-sm tracking-[0.2em] uppercase">
+                    Start Your Story
+                </button>
+<button class="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-16 py-6 rounded-full font-bold text-sm tracking-[0.2em] uppercase hover:bg-white/20 transition-colors">
+                    View Sample Itineraries
+                </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="w-full border-t border-slate-200 bg-white">
+<div class="max-w-7xl mx-auto px-12 py-20 flex flex-col md:flex-row justify-between items-start gap-16">
+<div class="space-y-6">
+<a class="font-headline font-black text-3xl text-primary" href="#">Voya</a>
+<p class="font-body text-sm text-on-surface-variant max-w-xs leading-relaxed">Defining the next era of editorial travel through artificial intelligence and curated human expertise.</p>
+<p class="font-body text-xs text-slate-400">© 2024 Voya Odyssey. All rights reserved.</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-16">
+<div class="flex flex-col gap-4">
+<p class="font-bold text-xs uppercase tracking-widest text-primary">Explore</p>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Destinations</a>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Journal</a>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Curations</a>
+</div>
+<div class="flex flex-col gap-4">
+<p class="font-bold text-xs uppercase tracking-widest text-primary">Company</p>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Our Story</a>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Concierge</a>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Press</a>
+</div>
+<div class="flex flex-col gap-4">
+<p class="font-bold text-xs uppercase tracking-widest text-primary">Legal</p>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Privacy</a>
+<a class="text-sm text-slate-500 hover:text-secondary transition-colors" href="#">Terms</a>
+</div>
+</div>
+<div class="flex gap-6">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors text-2xl">language</span>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors text-2xl">share</span>
+</div>
+</div>
+</footer>
+</body></html>
