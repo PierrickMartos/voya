@@ -38,7 +38,7 @@ const DEFAULT_PROMPT =
   "3 days in Rome with my wife, we've been once before so skip the obvious stuff. We're into good food, slow mornings, beautiful things. Romantic but not cheesy."
 
 function clipSrc(name: string, isDesktop: boolean) {
-  return `/videos/homepage/${name}_${isDesktop ? 'medium' : 'tiny'}.mp4`
+  return `${import.meta.env.BASE_URL}videos/homepage/${name}_${isDesktop ? 'medium' : 'tiny'}.mp4`
 }
 
 export default function Hero() {
