@@ -24,7 +24,7 @@ export default function Header({ variant = 'home' }: HeaderProps) {
         >
           Voya
         </Link>
-        <nav className="hidden md:flex items-center gap-10">
+        <nav className="flex items-center gap-6 md:gap-10">
           <Link
             to="/explore"
             className={`font-headline text-sm tracking-widest uppercase transition-colors ${

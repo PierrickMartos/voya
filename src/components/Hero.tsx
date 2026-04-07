@@ -34,8 +34,23 @@ const PIXABAY_AUTHORS: Record<string, string> = {
 const PLAY_DURATION = 8000  // ms each clip plays before fading
 const FADE_DURATION = 1500  // ms crossfade duration
 
-const DEFAULT_PROMPT =
-  "3 days in Rome with my wife, we've been once before so skip the obvious stuff. We're into good food, slow mornings, beautiful things. Romantic but not cheesy."
+const SAMPLE_PROMPTS = [
+  {
+    icon: 'favorite',
+    label: 'Romantic weekend in Rome',
+    prompt: "3 days in Rome with my wife — we've been once before so skip the obvious stuff. We're into good food, slow mornings, and beautiful things. Romantic but not cheesy.",
+  },
+  {
+    icon: 'waves',
+    label: 'Week in Brittany with the kids',
+    prompt: "7 days in Brittany, France with two young kids (ages 5 and 8). We love the coast, seafood, and the outdoors. Looking for beaches, tide pools, boat trips, and family-friendly restaurants. Relaxed pace, nothing too touristy.",
+  },
+  {
+    icon: 'groups',
+    label: '3 weeks in Vietnam with the family',
+    prompt: "3 weeks in Vietnam with my parents and siblings — ages 12 to 65. We want to experience the north, central, and south: food, history, nature, and some beach time. Mix of comfort and adventure, mid-range budget.",
+  },
+]
 
 function clipSrc(name: string, isDesktop: boolean) {
   return `${import.meta.env.BASE_URL}videos/homepage/${name}_${isDesktop ? 'medium' : 'tiny'}.mp4`
@@ -44,6 +59,9 @@ function clipSrc(name: string, isDesktop: boolean) {
 export default function Hero() {
   const [freeform, setFreeform] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [activePromptIndex, setActivePromptIndex] = useState(0)
+  const [promptText, setPromptText] = useState(SAMPLE_PROMPTS[0].prompt)
+  const [promptVisible, setPromptVisible] = useState(true)
   const [activeClipName, setActiveClipName] = useState(VIDEO_CLIPS[0])
   const [videoReady, setVideoReady] = useState(false)
 
@@ -141,7 +159,7 @@ export default function Hero() {
         <div className="glass-hero p-5 md:p-7 rounded-[2rem] w-full max-w-5xl shadow-2xl space-y-4">
 
           {freeform ? (
-            <div className="space-y-2 text-left">
+            <div className="space-y-3 text-left">
               <div className="flex items-center justify-between">
                 <label className="text-[10px] uppercase tracking-[0.3em] font-bold text-white/50">
                   Tell us about your dream trip
@@ -157,9 +175,34 @@ export default function Hero() {
                   </button>
                 </div>
               </div>
+              <div className="flex flex-wrap gap-2">
+                {SAMPLE_PROMPTS.map((sample, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setPromptVisible(false)
+                      setTimeout(() => {
+                        setActivePromptIndex(i)
+                        setPromptText(sample.prompt)
+                        setPromptVisible(true)
+                      }, 180)
+                    }}
+                    className={`flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 rounded-full border transition-all duration-200 ${
+                      activePromptIndex === i
+                        ? 'bg-[#D4AF37] border-[#D4AF37] text-[#001e40]'
+                        : 'bg-white/5 border-white/20 text-white/50 hover:border-white/40 hover:text-white/70'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[13px] leading-none">{sample.icon}</span>
+                    {sample.label}
+                  </button>
+                ))}
+              </div>
               <textarea
-                className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-base leading-relaxed placeholder:text-white/20 resize-none h-20"
-                defaultValue={DEFAULT_PROMPT}
+                className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-base leading-relaxed placeholder:text-white/20 resize-none h-20 transition-opacity duration-200"
+                style={{ opacity: promptVisible ? 1 : 0 }}
+                value={promptText}
+                onChange={e => { setPromptText(e.target.value); setActivePromptIndex(-1) }}
               />
             </div>
           ) : (
