@@ -99,7 +99,7 @@ export default function Hero() {
   return (
     <>
     {loading && <LoadingScreen />}
-    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
+    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}hero-poster.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className="absolute inset-0 z-0">
         {[0, 1].map((slot) => (
           <video
