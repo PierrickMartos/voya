@@ -45,6 +45,7 @@ export default function Hero() {
   const [freeform, setFreeform] = useState(true)
   const [loading, setLoading] = useState(false)
   const [activeClipName, setActiveClipName] = useState(VIDEO_CLIPS[0])
+  const [videoReady, setVideoReady] = useState(false)
 
   const videoRefs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)]
   const [activeSlot, setActiveSlot] = useState(0)
@@ -99,8 +100,18 @@ export default function Hero() {
   return (
     <>
     {loading && <LoadingScreen />}
-    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}hero-poster.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
       <div className="absolute inset-0 z-0">
+        {/* Poster image — fades out once the first video is ready */}
+        <img
+          src={`${import.meta.env.BASE_URL}hero-poster.jpg`}
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover scale-105"
+          style={{
+            opacity: videoReady ? 0 : 1,
+            transition: `opacity ${FADE_DURATION}ms ease-in-out`,
+          }}
+        />
         {[0, 1].map((slot) => (
           <video
             key={slot}
@@ -114,6 +125,7 @@ export default function Hero() {
             loop
             playsInline
             aria-hidden="true"
+            onCanPlay={() => !videoReady && setVideoReady(true)}
           />
         ))}
         <div className="absolute inset-0 hero-video-overlay" />
