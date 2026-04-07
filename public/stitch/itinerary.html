@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#cfe5ff",
+                        "tertiary-container": "#00365a",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-surface-variant": "#43474f",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#002038",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f8f9fa",
+                        "on-primary-container": "#799dd6",
+                        "on-tertiary-fixed-variant": "#004a79",
+                        "primary-fixed": "#d5e3ff",
+                        "on-secondary-fixed-variant": "#574500",
+                        "outline": "#737780",
+                        "surface-tint": "#3a5f94",
+                        "secondary-fixed": "#ffe088",
+                        "surface-variant": "#e1e3e4",
+                        "background": "#f8f9fa",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-container": "#fed65b",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#edeeef",
+                        "on-secondary-fixed": "#241a00",
+                        "on-primary-fixed-variant": "#1f477b",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#735c00",
+                        "primary-container": "#003366",
+                        "surface-container-high": "#e7e8e9",
+                        "primary-fixed-dim": "#a7c8ff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-tertiary-container": "#4ca1eb",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-fixed": "#001d34",
+                        "surface": "#f8f9fa",
+                        "tertiary-fixed-dim": "#9acbff",
+                        "secondary-fixed-dim": "#e9c349",
+                        "on-background": "#191c1d",
+                        "primary": "#001e40",
+                        "outline-variant": "#c3c6d1",
+                        "on-secondary-container": "#745c00",
+                        "inverse-primary": "#a7c8ff",
+                        "on-surface": "#191c1d",
+                        "on-primary-fixed": "#001b3c",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(248, 249, 250, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .text-shadow-sm {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-secondary-container/30">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0px_20px_40px_rgba(25,28,29,0.06)] fixed top-0 w-full z-50">
+<nav class="flex justify-between items-center px-8 h-20 w-full max-w-screen-2xl mx-auto">
+<div class="text-2xl font-serif italic text-blue-950 dark:text-blue-100">Voya</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-blue-900 dark:text-blue-100 font-bold border-b-2 border-blue-900 py-1 transition-opacity" href="#">Itinerary</a>
+<a class="text-slate-500 dark:text-slate-400 hover:opacity-70 transition-opacity" href="#">Sights</a>
+<a class="text-slate-500 dark:text-slate-400 hover:opacity-70 transition-opacity" href="#">Dining</a>
+<a class="text-slate-500 dark:text-slate-400 hover:opacity-70 transition-opacity" href="#">Stays</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-blue-900 dark:text-blue-200 hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="p-2 text-blue-900 dark:text-blue-200 hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">visibility_off</span>
+</button>
+</div>
+</nav>
+</header>
+<main class="pt-20">
+<!-- Editorial Hero Section -->
+<section class="relative h-[921px] overflow-hidden flex items-center px-8 md:px-20">
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-r from-background to-transparent z-10 via-background/20"></div>
+<img class="w-full h-full object-cover" data-alt="cinematic wide shot of Positano hillside buildings at sunset with golden light hitting the colorful Mediterranean architecture and blue sea" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPC4zr4zVv4OGwDwupZ933qmYE7fEp6ktcLyrGrFwOLsvIc6ZcLm_jW4-ScwlfHW5CKBAicHEG_Wbr59a0wmiBY1SV5qzOBmm3o5AoM68hFfLkZnRTzK-Zt6aX6Hbz7HtrHEDLmULdve-axeFSA5ti1qrSI30uougKlkTTVy3qlZ6iWIsbyrgAJyAQ1mebkpoh8NOlOqeDHUV3F6syGIqauyMtVjQoxlx4HN4LuBgNVMIlvfdhatHtoqEaq5xOE8eJaG34ZvVfCcSo"/>
+</div>
+<div class="relative z-20 max-w-4xl">
+<span class="inline-block px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-[10px] uppercase tracking-widest font-bold mb-6">Volume 04 / The Italian Coast</span>
+<h1 class="font-headline text-6xl md:text-8xl lg:text-9xl text-primary leading-[0.9] tracking-tighter mb-8 italic">
+                    Amalfi Coast: <br/>
+<span class="not-italic font-bold">The Eternal <br/>City Odyssey</span>
+</h1>
+<div class="flex flex-wrap items-center gap-6">
+<button class="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold flex items-center gap-3 shadow-lg hover:scale-102 transition-transform bg-gradient-to-br from-primary to-primary-container">
+                        Start Exploration
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<div class="flex items-center gap-3 p-2 bg-surface-container-low rounded-full">
+<span class="text-xs font-bold px-3 uppercase tracking-wider text-outline">Anti-Spoiler</span>
+<div class="w-12 h-6 bg-outline-variant/30 rounded-full relative cursor-pointer">
+<div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Overlapping Float Item -->
+<div class="absolute bottom-20 right-20 hidden lg:flex flex-col items-end max-w-xs z-30">
+<div class="relative mb-6">
+<img class="w-64 aspect-[4/5] object-cover rounded-sm shadow-2xl border-4 border-white" data-alt="cinematic shot of a small boat on turquoise water" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsH9mHl_fI9hhvW6TyIiFhj07fmv_jx2grmYwhgopSslx-JqJvoze0h9v4ZowPkGtZZqUFAnOpt-mqROCy3f7ncNKw8DF7pSn1JSaKidkjD-OjyI27ZSTf2pnsRLOS2qWORpdCZ-1Z6_hGdU1OQ_dODtIpqmgsKvK-2UWMr_cy1ZzFzJz1NshSvGt8MJ8_2MedZAI3r2ibYAD9qJlozENrlj-x9QZZpSOCf7SiKlcVZZxFI4WItXNFlOIZP1uWNydmkan4HKTiRnQG"/>
+<div class="absolute -bottom-4 -left-8 bg-primary p-4 rounded-full text-white shadow-lg">
+<span class="material-symbols-outlined text-2xl">format_quote</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline italic text-2xl text-primary leading-tight mb-2 tracking-tight">
+            "The sea is the only <br/> language I understand."
+        </p>
+<p class="text-[10px] uppercase tracking-[0.2em] font-bold text-outline">
+            — Local Captain, Praiano
+        </p>
+</div>
+</div>
+</section>
+<!-- Staggered Itinerary -->
+<section class="py-24 px-8 md:px-20 max-w-screen-2xl mx-auto overflow-hidden">
+<div class="flex flex-col md:flex-row justify-between items-baseline mb-20 gap-8">
+<div>
+<h2 class="font-headline text-5xl text-primary mb-4">The 4-Day Rhythm</h2>
+<p class="text-on-surface-variant max-w-md">An intentionally paced journey through coastal secrets and ancient echoes.</p>
+</div>
+<div class="h-px flex-grow bg-outline-variant/20 mx-8 hidden md:block"></div>
+<div class="flex gap-4">
+<span class="w-12 h-12 flex items-center justify-center rounded-full border border-outline-variant/30 text-outline cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</span>
+<span class="w-12 h-12 flex items-center justify-center rounded-full border border-outline-variant/30 text-outline cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</span>
+</div>
+</div>
+<!-- Horizontal Scroll/Staggered Track -->
+<div class="flex gap-8 overflow-x-auto pb-12 snap-x no-scrollbar">
+<!-- Day 01 -->
+<div class="flex-none w-[350px] snap-start mt-12">
+<div class="relative mb-8 group">
+<div class="absolute -top-6 -left-4 font-headline text-7xl text-secondary-container/40 z-0">01</div>
+<img class="w-full aspect-[3/4] object-cover rounded-xl shadow-lg group-hover:scale-[1.02] transition-transform duration-500" data-alt="narrow cobblestone alleyway in Amalfi town with white washed walls and hanging laundry under a clear blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAV0S3LACB-DmCZ-nD4QhIe0BnvLzba2e8x8NnSiFBSugytXVn5XWnxxEek7tSn__T7wu5N0VM9DW4SgQPAecsN06s_oV0XqgDas-QTLmGNT-Wxib-kFrl8V4vLRDclwORWGDMkmltdGGe88zIl3vhpaQqbdk3NG1bqHnG761wxR9tVOEF-qGWooYrYfhwITIh4VP-2XTryD5KL9F9emJsAErb2XJZDPwYhRWFTjmKG57Q1kSXEYcJ9IqClQK1Ic9024SSnJdPij0x"/>
+</div>
+<h3 class="font-headline text-2xl mb-2">Arrival in Amalfi Town</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Settle into the historic heart. Wander the Piazza del Duomo before a private twilight terrace dinner.</p>
+</div>
+<!-- Day 02 -->
+<div class="flex-none w-[350px] snap-start">
+<div class="relative mb-8 group">
+<div class="absolute -top-6 -left-4 font-headline text-7xl text-secondary-container/40 z-0">02</div>
+<img class="w-full aspect-[3/4] object-cover rounded-xl shadow-lg group-hover:scale-[1.02] transition-transform duration-500" data-alt="breath-taking view of the path of the gods hiking trail overlooking the deep blue Mediterranean sea and distant cliffs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuMPNrh-nuG4V3-NR86ACIHB7hdwuqnJ_uGAWiEUWrf-o0-oROfJbkM174_bfFgOOjI03B_7CedwZPWNxDZ1gkjtRxMZ1FHV6BwHbsXO7K1NBcVUrnZSm5ZwKjXslA7E_ahP1b7eeCbLVshtOZPfXdOjgvkjyp6ceh0sWFvrYHvM86ku3fpctvIxPhUQdDjLOiDnHl3xB4cj1Htkh0gafK4kFxl19WMGMozDKz7M5Cbl3TPl6_2dbELFwE9HNLozlnbX5V4dpfDxiM"/>
+</div>
+<h3 class="font-headline text-2xl mb-2">The Path of the Gods</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">A morning trek from Agerola to Nocelle. High-altitude views that touch the edge of the divine.</p>
+</div>
+<!-- Day 03 -->
+<div class="flex-none w-[350px] snap-start mt-12">
+<div class="relative mb-8 group">
+<div class="absolute -top-6 -left-4 font-headline text-7xl text-secondary-container/40 z-0">03</div>
+<img class="w-full aspect-[3/4] object-cover rounded-xl shadow-lg group-hover:scale-[1.02] transition-transform duration-500" data-alt="luxury wooden speedboat cruising through the Faraglioni rocks of Capri in crystal clear turquoise water" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlbtOyHaVy7awFUrV2ZRhxsY1kz0aZ_ao2Nvw8tyTxuKWieMOZYtLKrhEA8WiAOH-t5E2s3MwGyitM6TKo4LQcVSvMiHsu0_VB45QLsQ9DY_0mOD0O5PJwQ9-CDPR2kXUremPJrTB4rSmaqHHJ46F2x2nRDwESJU6n9O2JGJmJpSQArknnWzm_WBd7HKUSLmG4Oo-Gla7SVd7IXOC8eq_6MOQxn3hWs-s-zMC8oemCzInxaZ_ZYrkWL_2zI9vVuvm-ugu7hIeSgYkl"/>
+</div>
+<h3 class="font-headline text-2xl mb-2">Capri &amp; Blue Grotto</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Charter a private gozzo. Swim in hidden coves and lunch at La Fontelina beach club.</p>
+</div>
+<!-- Day 04 -->
+<div class="flex-none w-[350px] snap-start">
+<div class="relative mb-8 group">
+<div class="absolute -top-6 -left-4 font-headline text-7xl text-secondary-container/40 z-0">04</div>
+<img class="w-full aspect-[3/4] object-cover rounded-xl shadow-lg group-hover:scale-[1.02] transition-transform duration-500" data-alt="elegant evening scene in Positano with glowing lights from the cliffside villas reflected in the dark sea" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2qlRpizS5k3GF1wBYo-E-ov_O4QcNXoed8CGHeikPv56bbBqzV_jQB-Mq9Xn1PrUUn08DleRA6LwPK3JaOxIGLokD9xVJHyq9bmaZQq7KBsu-yVzoh8Wv14YO81SplbhUc9j-4BWQd_RH3OqNruOB83AsfNj3mGXZxbFkcXaqB6_EHjnDWd2WV1P8B2WBDDW8obYhO9j2NTjopzgnzhpFdeExt8OHlTtDYPNOB1s9hnqs3sqx6BD64n8uvfSIBcSqPdBljtQ_aRQu"/>
+</div>
+<h3 class="font-headline text-2xl mb-2">Positano Farewells</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">The vertical city. Shopping for linens, sipping limoncello, and a final sunset at Franco’s Bar.</p>
+</div>
+</div>
+</section>
+<!-- Curated Selection: Asymmetric Bento -->
+<section class="py-24 bg-surface-container-low relative">
+<div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-background to-transparent"></div>
+<div class="max-w-screen-2xl mx-auto px-8 md:px-20 relative z-10">
+<div class="mb-16">
+<h2 class="font-headline text-5xl text-primary mb-2">Curated Selection</h2>
+<p class="font-label uppercase tracking-widest text-secondary font-bold">The Editorial Picks</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+<!-- Sights: Large Hero Card -->
+<div class="md:col-span-8 bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm group">
+<div class="grid md:grid-cols-2 gap-0">
+<div class="aspect-square md:aspect-auto h-full overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="close up of colorful umbrellas at Spiaggia Grande beach in Positano with turquoise water and sand" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfo_ZHR4an7JdSEZcdbXg-dl7HVPR9we320h9T6suCGSTRO0_mBaWYl09sRj0bw0vSBxxwpEzH97Gjxxx0WU-VhubjBwffwr7zfrwfjz4kFgqshHPNvmMCUZ0dp07tOmLrPtHIFjfiWOYbjDDyqlrNCWqxIMhgE5t5sYgYKuW4oOoCBN5yXSh43mWI-5McXtD3ZQNq6Mgtq5emgDQb9JxdaNYy3yjB0mFTya348-eJt_ZzM20bBuv6NXGWl8QR2g4-E_NoUBxG5RyY"/>
+</div>
+<div class="p-10 flex flex-col justify-center">
+<span class="text-xs font-bold text-secondary uppercase tracking-tighter mb-4">Must-See Sight</span>
+<h3 class="font-headline text-4xl mb-6">Spiaggia Grande</h3>
+<p class="text-on-surface-variant mb-10 leading-relaxed">The pulsating heart of Positano. A kaleidoscope of orange umbrellas and cobalt blue sea, framed by the vertical architecture of the gods.</p>
+<div class="flex gap-4">
+<button class="px-6 py-3 border border-outline-variant/30 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-sm">location_on</span>
+                                        Google Maps
+                                    </button>
+<button class="px-6 py-3 border border-outline-variant/30 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-sm">language</span>
+                                        Website
+                                    </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Dining: Vertical Card -->
+<div class="md:col-span-4 bg-surface-container-lowest p-8 rounded-xl shadow-sm md:mt-20">
+<img class="w-full aspect-video object-cover rounded-lg mb-8" data-alt="traditional Italian pasta dish served on a hand-painted ceramic plate with fresh basil and tomatoes in an outdoor setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7XeaDSYjWwMQGxshrAbqwF7QIqEL5Mc2T7HUCAgbngmGkdbdb6curvuiaMAuhtCBuQhPz5y5UUhrkc886zpxRc-qf0O-V_ikshqBuTTARmIewS5BrHG0iLfh9gK0OZGk3IzhaR2S076ugWiR8n-Rs5QtotvqQAipDDeCvia05Vcso92W2rYIk3LEtEs4t4J9Y0op9Ht1tlm68lb3GZEqm8qqiSDbcKRBScqmsXxHiaMkNJUETsBs3nYXgpXdGhjC3y7TmBrgVmFVZ"/>
+<span class="text-xs font-bold text-secondary uppercase tracking-tighter mb-2 block">Iconic Dining</span>
+<h3 class="font-headline text-3xl mb-4">Chez Black</h3>
+<p class="text-sm text-on-surface-variant mb-8 leading-relaxed">Since 1949, the go-to spot for spaghetti with sea urchins and people-watching on the beachfront.</p>
+<div class="flex flex-col gap-3">
+<button class="w-full py-3 bg-surface border border-outline-variant/30 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">restaurant</span>
+                                Reserve Table
+                            </button>
+<button class="w-full py-3 border border-outline-variant/30 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span>
+                                Map Directions
+                            </button>
+</div>
+</div>
+<!-- Stay: Long Horizontal -->
+<div class="md:col-span-12 lg:col-span-10 lg:col-start-2 bg-primary text-on-primary rounded-xl overflow-hidden mt-8 flex flex-col md:flex-row">
+<div class="md:w-1/2 p-12 flex flex-col justify-center">
+<span class="text-xs font-bold text-secondary-container uppercase tracking-widest mb-4">Ultimate Stay</span>
+<h3 class="font-headline text-5xl mb-6">Le Sirenuse</h3>
+<p class="text-on-primary/80 mb-10 text-lg leading-relaxed font-serif italic">"A dream place that isn’t quite real when you are there and becomes beckoningly real after you have gone." — John Steinbeck</p>
+<div class="flex gap-4">
+<button class="px-8 py-4 bg-secondary-container text-on-secondary-container rounded-xl font-bold hover:brightness-110 transition-all">
+                                    Book The Experience
+                                </button>
+<button class="px-8 py-4 bg-white/10 backdrop-blur rounded-xl font-bold hover:bg-white/20 transition-all border border-white/20">
+                                    Official Gallery
+                                </button>
+</div>
+</div>
+<div class="md:w-1/2 h-[400px] md:h-auto">
+<img class="w-full h-full object-cover" data-alt="luxury hotel balcony with a view of the Positano church dome and sea at dawn with soft pink sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2_SF1DZEm085ibHmgphRnI-qCD96T-cVhFsVmKvgxDxSLskFQbV3c0W3koaEU48imbBjeJ-hZGlbs7GoE_F4EcOCDLPCcgWdqGg6hCF54wuNkMT7-hNQi7dZh7GAKlhSg1soOECW5f2ojLwhGQOhvxap5v6NUZD_4zzyiGzL53JWpZKoqTpMoYvmVUxcx7ye8I2lMwo9nznD8tYqPrNyPP_g7Z0PuCOAXGtbvc0vqz0rKfgQXqGFcgqGpT-9JFaXcZwglNEiWGLcA"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Travel Logistics / Scrapbook Footer -->
+<section class="py-24 px-8 md:px-20 max-w-screen-2xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-center">
+<div class="space-y-6">
+<h4 class="font-headline text-3xl">Logistical Ease</h4>
+<p class="text-on-surface-variant">We've coordinated every detail, from the private Mercedes transfers to the boat moorings in Capri.</p>
+<ul class="space-y-4">
+<li class="flex items-center gap-4 text-sm font-bold">
+<span class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-lg">flight</span>
+</span>
+                            NAP International Airport (75 mins)
+                        </li>
+<li class="flex items-center gap-4 text-sm font-bold">
+<span class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-lg">directions_car</span>
+</span>
+                            Private Chauffeur Included
+                        </li>
+<li class="flex items-center gap-4 text-sm font-bold">
+<span class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-lg">directions_boat</span>
+</span>
+                            Daily Yacht Allocation
+                        </li>
+</ul>
+</div>
+<div class="md:col-span-2 relative">
+<!-- Scrapbook Map Element -->
+<div class="aspect-video rounded-3xl overflow-hidden shadow-2xl relative">
+<img class="w-full h-full object-cover grayscale opacity-40" data-alt="aerial map-like view of the Amalfi coast shoreline with winding roads and rugged cliffs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8cBY0hJHsIc6jTcj1PsKR7JRjUJ2gjMsmZLNUEpRmZGQpROUxvjkTziBo4lopIW-Tfje5V4O7NKV8i3Zb1yKPrso1AevSY0fBlegqG1iF8AS2PG43OqtyFjNk9V_SQ41a_cGf1XhYMZM3870YfKS_IzMxBLcOJ_byXqk8_0dPakPy_WuxUYv_BxxHdF8K3PtP0GVQ-2sI6WpeCEL4VnCg0xZr1TXTYugfl71K3XwwRpL2qDiCwkC0snWT4S7bq_6KkoZ88BBQNGOP"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="p-8 bg-white/90 backdrop-blur rounded-2xl shadow-xl max-w-sm text-center">
+<span class="material-symbols-outlined text-4xl text-secondary mb-4">map</span>
+<h5 class="font-headline text-2xl mb-2">Interactive Territory</h5>
+<p class="text-xs text-on-surface-variant mb-6">Explore the precise waypoints of your journey across the Sorrento Peninsula.</p>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-full text-xs font-bold">Open Full Map</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest py-16 px-8 md:px-20 border-t border-outline-variant/10">
+<div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="text-3xl font-serif italic text-blue-950">Voya</div>
+<div class="text-sm text-outline">
+                © 2024 Voya Luxury Travel. All Rights Reserved.
+            </div>
+<div class="flex gap-6">
+<a class="text-outline hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">brand_family</span></a>
+<a class="text-outline hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">hub</span></a>
+<a class="text-outline hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">explore</span></a>
+</div>
+</div>
+</footer>
+<!-- SideNavBar (Suppressed for transactional/detail page but structure included for logic) -->
+<!-- Hidden for this specific focused view -->
+</body></html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ODYSSEY | Destination Explorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#fed65b",
+                        "on-tertiary-fixed-variant": "#004a79",
+                        "surface-variant": "#e1e3e4",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#00365a",
+                        "outline-variant": "#c3c6d1",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#3a5f94",
+                        "primary-container": "#003366",
+                        "on-primary-fixed-variant": "#1f477b",
+                        "surface-container-low": "#f3f4f5",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-primary": "#ffffff",
+                        "surface": "#f8f9fa",
+                        "inverse-primary": "#a7c8ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#43474f",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#574500",
+                        "secondary-fixed": "#ffe088",
+                        "inverse-surface": "#2e3132",
+                        "surface-container": "#edeeef",
+                        "outline": "#737780",
+                        "secondary": "#735c00",
+                        "on-primary-fixed": "#001b3c",
+                        "on-surface": "#191c1d",
+                        "on-primary-container": "#799dd6",
+                        "surface-dim": "#d9dadb",
+                        "primary-fixed-dim": "#a7c8ff",
+                        "secondary-fixed-dim": "#e9c349",
+                        "primary-fixed": "#d5e3ff",
+                        "on-secondary-fixed": "#241a00",
+                        "tertiary-fixed": "#cfe5ff",
+                        "on-tertiary-fixed": "#001d34",
+                        "surface-bright": "#f8f9fa",
+                        "background": "#f8f9fa",
+                        "tertiary-fixed-dim": "#9acbff",
+                        "on-secondary-container": "#745c00",
+                        "on-background": "#191c1d",
+                        "surface-container-high": "#e7e8e9",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#002038",
+                        "on-tertiary-container": "#4ca1eb",
+                        "on-error": "#ffffff",
+                        "primary": "#001e40",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, .font-serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for an editorial feel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8f9fa; }
+        ::-webkit-scrollbar-thumb { background: #001e40; border-radius: 3px; }
+        
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-auto-rows: 240px;
+            gap: 1.5rem;
+            grid-auto-flow: dense;
+        }
+        .span-v-2 { grid-row: span 2; }
+        .span-h-2 { grid-column: span 2; }
+        .span-both-2 { grid-row: span 2; grid-column: span 2; }
+
+        @media (max-width: 768px) {
+            .span-h-2, .span-both-2 { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl flex justify-between items-center px-8 h-20 w-full shadow-[0_20px_40px_rgba(25,28,29,0.06)]">
+<div class="text-2xl font-bold font-serif tracking-tighter text-blue-950 dark:text-slate-50">ODYSSEY</div>
+<nav class="hidden md:flex items-center space-x-10">
+<a class="text-blue-900 dark:text-blue-300 font-bold border-b-2 border-blue-900 dark:border-blue-300 pb-1 hover:text-blue-950 dark:hover:text-white transition-colors duration-300" href="#">Discover</a>
+<a class="text-blue-800/70 dark:text-slate-400 font-medium hover:text-blue-950 dark:hover:text-white transition-colors duration-300" href="#">Destinations</a>
+<a class="text-blue-800/70 dark:text-slate-400 font-medium hover:text-blue-950 dark:hover:text-white transition-colors duration-300" href="#">Itineraries</a>
+</nav>
+<div class="flex items-center space-x-4">
+<button class="p-2 text-blue-900 dark:text-blue-200 scale-102 transition-transform duration-500">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-24 pb-8 px-4 md:px-8 max-w-[1920px] mx-auto min-h-screen">
+<!-- Pinterest-style Asymmetric Bento Grid -->
+<div class="masonry-grid">
+<!-- Destination Card: Amalfi Coast -->
+<div class="group relative overflow-hidden rounded-xl span-both-2 bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="dramatic wide shot of colorful Amalfi Coast houses clinging to steep cliffs overlooking a deep turquoise sea at sunset" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrcAKxTyobY8LGgzZWOUyN5dNAg7zwXLRuZeqAmt2DljiStLosLuZxx9cItoF1cceSR-puB4T3-67rK7L9uGVyQIgaGnZL0OmC7W_EXdvc4R6VAHACmcvIwN9n9JPdBBUoPbEUOP2sSHt-Je5OsTNXNFHjRblHHDrPlbTMjxAXn7waGkp5JroIODUEWKY9q68A_qkf1rZoiJvjJPdVWxpi3QVp4G0pfRFdgnSu0HKeMD36os5OsTJGVBFoymrwFoXDf96u--cIbwTH')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-8 w-full">
+<span class="inline-block px-3 py-1 mb-3 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-extrabold uppercase tracking-widest">Romantic</span>
+<h2 class="text-4xl font-headline text-on-primary font-bold leading-none mb-2">Amalfi Coast</h2>
+<div class="flex items-center gap-2 text-on-primary/80 text-sm font-medium">
+<span class="material-symbols-outlined text-sm" data-icon="group">group</span>
+<span>2 People</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Kyoto -->
+<div class="group relative overflow-hidden rounded-xl span-v-2 bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="traditional wooden temple architecture in Kyoto surrounded by vibrant autumn maple leaves in shades of red and gold" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDGmWjtsvjq2QKSl7OmI57qjKwNWyHBDJUE5X3YNjKyugBwXK1qIQdC8xuefNfQ70MNum5guAfSiHCLlkf6TjdJRnY8pIdSF5BJ2DqY5gFAd1JyizRfvqaGGIlk_p6X2q3P6erNyMHH5JwbmAftpX6O_vGcX9NkhfAmZoa1VUIkcIfY27JOMMfo-5sbt9bbWgdgAPzTLl0y0fTk6QF4Y39TOD25GPMuhXvdaIuuFkQh3ByaKNgisRDaO3OfrDX9GdVWJupubo262w6C')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6 w-full">
+<span class="inline-block px-3 py-1 mb-2 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-extrabold uppercase tracking-widest">Cultural</span>
+<h3 class="text-2xl font-headline text-on-primary font-bold mb-1">Kyoto</h3>
+<div class="flex items-center gap-2 text-on-primary/80 text-xs">
+<span class="material-symbols-outlined text-xs" data-icon="group">group</span>
+<span>Solo Explorer</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Santorini -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="iconic blue domed church in Oia Santorini with white washed walls against a clear azure sky and sparkling sea" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBewdzC1UbQJS10iiGPJ5EhNsXsHsjxU4n58XoNX78uqjRhjYBhj1pbM5aTsmNLYFTYzaM9etavdC9mBOTh2i7sq-2hOF8ylweAmR7_3hGQ-VlcTBPjJjLNfrdiF5hcrhBFSffTGjP-SnjxBXpPn_U_CFcoeNKe6CeZHepHVarDMRoLUZS69B0ELqgKch46OInin4f0JdPUzQ-z-PI_IjCudS3I-3qS2MarSl9bPytPSTVqdtB4hIX6iYA9Y4DQxz5WlB_SgAMvxOiS')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-4 w-full">
+<h3 class="text-xl font-headline text-on-primary font-bold">Santorini</h3>
+<div class="flex justify-between items-center mt-2">
+<span class="text-on-primary/70 text-[10px] uppercase font-bold tracking-wider">Dreamy</span>
+<span class="text-on-primary/70 text-[10px] font-bold">2 People</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Patagonia -->
+<div class="group relative overflow-hidden rounded-xl span-h-2 bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="majestic snow-capped granite peaks of Torres del Paine reflected in a mirror-still glacial lake at dawn" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCRPotVJoHbcsqYSDBPMJvaJD0MyxEiSAJ_KICsm9SDoSgfAlH5SbEJgr2-Hb8c8G6QZRPoaBugIUQ-xn5wor0s4tuA83KD_jKZpVSvIaFolbI3Cz_-eSX9y1dpZe9OvUBEd-r2AmWRNuMdLWhgJs_uJeuhZBEC86Yp1aiCOjmrt1HV7SSgJvw1wka8pmSuQdUoMZMYKrzBU3yvKSewHAIqB0sISO_fHH1h2fx3HqrYSg5z_9MMMRWLptP14vkebcFaioVBXi29x0j9')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6 w-full flex justify-between items-end">
+<div>
+<span class="inline-block px-3 py-1 mb-2 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-extrabold uppercase tracking-widest">Adventurous</span>
+<h3 class="text-3xl font-headline text-on-primary font-bold">Patagonia</h3>
+</div>
+<div class="flex items-center gap-2 text-on-primary/80 text-sm font-medium pb-1">
+<span class="material-symbols-outlined text-sm" data-icon="diversity_3">diversity_3</span>
+<span>Group of 4</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Maldives -->
+<div class="group relative overflow-hidden rounded-xl span-v-2 bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="luxury overwater villa in the Maldives with transparent floor section showing coral reef and tropical fish below" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAds-iyfTVCMRB9ZKbOrmw6VIovYbzJPAOudatLa3bbhoUOsVSalTTdEXF1sp547JCx4-Z2IJlXq3xDynL_1z5bU5-L5lOHOzwzMSBy26m4kGo8q2KdHr-9vN2o_yj9IdwUrADUCBMSMjeHGSgph5G4WFl5uc4HO0vwVLhd2xGUkELv43EAbJf_2FUP0LaBVaCNknRu-lnXv5JZHM3ed_oxhwge6iSdyZJhnafBXYeOFiX9-r60X8bzRmMH2AmSFNXJP-ZAfPkzlWMp')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6 w-full">
+<span class="inline-block px-3 py-1 mb-2 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-extrabold uppercase tracking-widest">Exclusive</span>
+<h3 class="text-2xl font-headline text-on-primary font-bold mb-1">Maldives</h3>
+<div class="flex items-center gap-2 text-on-primary/80 text-xs">
+<span class="material-symbols-outlined text-xs" data-icon="group">group</span>
+<span>Family of 4</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Serengeti -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="stunning close up of a majestic lion walking through golden savanna grass at sunrise in the Serengeti" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfxs7xLoCc2OW9WyV4JTOY_rA416FsNuUmAargOxk7xRoGStERwTLWFfZChXI3J2Wki3fkb-UPEsZAtC8WFdwWEyPZGvX4X_WuK0_LZ4sE9rFOFVqRGH5hmtCLb_niHONWgcGex1yMhD_SzlP-zU5zkhlHLlL5MfjVgOIznURbz_rMyGrSzWfYGkdpRAzSFD3YWicOeJ1Ulisi5GqXnkl1LOmHiwYHjCVKpXxSzV2mQzoCkO8F6SWILGBxaXejIybL-phugXVcNcmU')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-4 w-full">
+<h3 class="text-xl font-headline text-on-primary font-bold">Serengeti</h3>
+<div class="flex justify-between items-center mt-2">
+<span class="text-on-primary/70 text-[10px] uppercase font-bold tracking-wider">Safari</span>
+<span class="text-on-primary/70 text-[10px] font-bold">Group of 6</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Provence -->
+<div class="group relative overflow-hidden rounded-xl span-h-2 bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="endless rows of blooming purple lavender fields in Provence with a solitary stone farmhouse in the distance" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDU3bYmUtG-_yerYgUtnkYpitGlm3gcp7ecFek-ZhYo1Z5l1VR4yN-r9iZnhET_KMxl2dGLlIh_gOeAoRbiC9jxQO5sjGtzrhYeQ3zsYP1ih1TjgEZ8iIqNTYp_lVyPltdfKaD4MT8Vt9TOCJTwf6-79NR9CPg9eq8SQeozxF3i-P1iBqNSgJSte2U8h8ptNvxA8TlMqSZwM7PqXiJLX-e6XJHbP928XBuJLiZJcRaBREcVzXYP_kSXmAQrw1ooHFkPjUYGT1LONnfP')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6 w-full flex justify-between items-end">
+<div>
+<span class="inline-block px-3 py-1 mb-2 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-extrabold uppercase tracking-widest">Rustic</span>
+<h3 class="text-3xl font-headline text-on-primary font-bold">Provence</h3>
+</div>
+<div class="flex items-center gap-2 text-on-primary/80 text-sm font-medium pb-1">
+<span class="material-symbols-outlined text-sm" data-icon="group">group</span>
+<span>2 People</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Iceland -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="vibrant neon green northern lights dancing over a dramatic black sand beach and crashing white waves in Iceland" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDoGSih9SWmI4aYfLZ_4D9vl-rfaz1xlZvHj3SX8RJO9ZSQwW9w0zaPzwJS1wXssi2ikt9SHdRQLLEz9AoOcbcYjJTnRvzsVi8_IUNMuRUZjSdnSt_OMElCs2HqWscD8Dlqj6uH_ps1mhMHVjp4-3Gw-zBDldtUuEuvAjCswWp4yK7S24a1J9wBZZ9nnz5wqbVZDv2GBHPqq9LaU8mRK8uRrM-jpISb5qWpnTKzCMIEcy3w2X_1D3Gpp6bcY7Qr2OIi9UCkkCkP97dD')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-4 w-full">
+<h3 class="text-xl font-headline text-on-primary font-bold">Iceland</h3>
+<div class="flex justify-between items-center mt-2">
+<span class="text-on-primary/70 text-[10px] uppercase font-bold tracking-wider">Mystical</span>
+<span class="text-on-primary/70 text-[10px] font-bold">Solo Explorer</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Swiss Alps -->
+<div class="group relative overflow-hidden rounded-xl span-v-2 bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="snowy mountain peaks of the Swiss Alps with a charming wooden chalet and smoke rising from the chimney" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrMg4VDNrKGx8eE-7b7vmIA-AC834i2c7bXtp-GPrAznuE49wPHKBYXc7GtQUIy_8jLQeUvrce2pvGlW6dp72YTZYyq1pMc57BvXZWgHxJ77lTr8Is3DmB5q5_WKddUQmJ2xSOQuhFO5fhVdLtJWptcu4hk0FbOxVdchI0ypkyzjXmDoqHxdZebf3mXTuY2eRK1lCHMMM-NF1q7sRx_1RCJOiNYyjVdKa3TrYt8bwd7W2DNe-aDWRloy4fOGQfuaTAcQ9apLz-Gbmb')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6 w-full">
+<span class="inline-block px-3 py-1 mb-2 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-extrabold uppercase tracking-widest">Cozy</span>
+<h3 class="text-2xl font-headline text-on-primary font-bold mb-1">Swiss Alps</h3>
+<div class="flex items-center gap-2 text-on-primary/80 text-xs">
+<span class="material-symbols-outlined text-xs" data-icon="group">group</span>
+<span>Family of 5</span>
+</div>
+</div>
+</div>
+<!-- Destination Card: Bora Bora -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-low cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="aerial view of Mount Otemanu in Bora Bora surrounded by a turquoise lagoon with scattered overwater bungalows" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBbQuEvU3MVTjX1u42c33_skOtHX7xabgYKZOEuiY2BBmMxQ-vbChB3V9JVYDoEiCs33jorIa94cUFr_0nIVqjCnMnNFXImkitr6zHBd2JY5xke1agBA6MNRfz13KVk9MKqRV64dj5G9WPvE1dpiHjr63NxsChWmRCSRniYCWJopeJbTFHAL2ueMmx_PegmzaMSM06tYknnK4j_faUy_zM4p6A9zoG6R3j0PQSi5Wqxoweu4oLquTwCgR3OYVgm2Y11fVFQ2VBiNzSD')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-4 w-full">
+<h3 class="text-xl font-headline text-on-primary font-bold">Bora Bora</h3>
+<div class="flex justify-between items-center mt-2">
+<span class="text-on-primary/70 text-[10px] uppercase font-bold tracking-wider">Tropical</span>
+<span class="text-on-primary/70 text-[10px] font-bold">2 People</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- SideNavBar (Hidden on desktop, integrated logic) -->
+<aside class="hidden md:flex fixed left-0 top-0 h-full w-20 flex-col items-center py-8 bg-slate-50 dark:bg-slate-900 z-40 border-r-0 shadow-none">
+<div class="mb-12">
+<span class="material-symbols-outlined text-blue-900 dark:text-blue-400 text-3xl" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+</div>
+<div class="flex flex-col gap-8 flex-1">
+<button class="text-slate-500 dark:text-slate-400 hover:text-blue-900 transition-all">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+</button>
+<button class="text-blue-900 dark:text-blue-300 font-bold bg-blue-50 dark:bg-blue-900/20 rounded-full p-3 scale-95">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+</button>
+<button class="text-slate-500 dark:text-slate-400 hover:text-blue-900 transition-all">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+<button class="text-slate-500 dark:text-slate-400 hover:text-blue-900 transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</aside>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl h-16 flex justify-around items-center z-50 px-6 border-t border-outline-variant/10">
+<button class="text-slate-500 flex flex-col items-center">
+<span class="material-symbols-outlined text-2xl" data-icon="home">home</span>
+</button>
+<button class="text-blue-900 flex flex-col items-center">
+<span class="material-symbols-outlined text-2xl" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+</button>
+<button class="text-slate-500 flex flex-col items-center">
+<span class="material-symbols-outlined text-2xl" data-icon="bookmark">bookmark</span>
+</button>
+<button class="text-slate-500 flex flex-col items-center">
+<span class="material-symbols-outlined text-2xl" data-icon="account_circle">account_circle</span>
+</button>
+</nav>
+</body></html>
