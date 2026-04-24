@@ -50,6 +50,7 @@ describe('Hero — toggle to guided mode', () => {
     expect(screen.getByText(/who are you and with whom/i)).toBeInTheDocument()
     expect(screen.getByText(/where to/i)).toBeInTheDocument()
     expect(screen.getByText(/the vibe/i)).toBeInTheDocument()
+    expect(screen.getByText(/when/i)).toBeInTheDocument()
   })
 
   it('shows the "Guided" toggle label in guided mode', async () => {
@@ -73,5 +74,38 @@ describe('Hero — CTA', () => {
     expect(
       screen.getByRole('button', { name: /generate my itinerary/i })
     ).toBeInTheDocument()
+  })
+
+  it('asks for the destination when it is missing from a freeform request', async () => {
+    renderHero()
+    const textarea = screen.getByRole('textbox')
+    await userEvent.clear(textarea)
+    await userEvent.type(textarea, 'A relaxed food trip with my wife in May')
+
+    await userEvent.click(screen.getByRole('button', { name: /generate my itinerary/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/where you want to go/i)
+  })
+
+  it('asks for timing when it is missing from a freeform request', async () => {
+    renderHero()
+    const textarea = screen.getByRole('textbox')
+    await userEvent.clear(textarea)
+    await userEvent.type(textarea, 'A relaxed food trip in Rome with my wife')
+
+    await userEvent.click(screen.getByRole('button', { name: /generate my itinerary/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/when you want to travel/i)
+  })
+
+  it('allows an open destination when the user asks Voya to choose', async () => {
+    renderHero()
+    const textarea = screen.getByRole('textbox')
+    await userEvent.clear(textarea)
+    await userEvent.type(textarea, 'Find a romantic food destination for me and my wife next summer')
+
+    await userEvent.click(screen.getByRole('button', { name: /generate my itinerary/i }))
+
+    expect(await screen.findByText(/curating your editorial odyssey/i)).toBeInTheDocument()
   })
 })

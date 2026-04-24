@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import LoadingScreen from './LoadingScreen'
+import { discoverRestaurantsAndActivities } from '../lib/llmlayer'
+import { validateTripRequest, type TripPreflightInput } from '../lib/tripPreflight'
 
 const VIDEO_CLIPS = [
   '146632-789534284',
@@ -38,17 +41,17 @@ const SAMPLE_PROMPTS = [
   {
     icon: 'favorite',
     label: 'Romantic weekend in Rome',
-    prompt: "3 days in Rome with my wife — we've been once before so skip the obvious stuff. We're into good food, slow mornings, and beautiful things. Romantic but not cheesy.",
+    prompt: "3 days in Rome with my wife in May — we've been once before so skip the obvious stuff. We're into good food, slow mornings, and beautiful things. Romantic but not cheesy.",
   },
   {
     icon: 'waves',
     label: 'Week in Brittany with the kids',
-    prompt: "7 days in Brittany, France with two young kids (ages 5 and 8). We love the coast, seafood, and the outdoors. Looking for beaches, tide pools, boat trips, and family-friendly restaurants. Relaxed pace, nothing too touristy.",
+    prompt: "7 days in Brittany, France next summer with two young kids (ages 5 and 8). We love the coast, seafood, and the outdoors. Looking for beaches, tide pools, boat trips, and family-friendly restaurants. Relaxed pace, nothing too touristy.",
   },
   {
     icon: 'groups',
     label: '3 weeks in Vietnam with the family',
-    prompt: "3 weeks in Vietnam with my parents and siblings — ages 12 to 65. We want to experience the north, central, and south: food, history, nature, and some beach time. Mix of comfort and adventure, mid-range budget.",
+    prompt: "3 weeks in Vietnam in December with my parents and siblings — ages 12 to 65. We want to experience the north, central, and south: food, history, nature, and some beach time. Mix of comfort and adventure, mid-range budget.",
   },
 ]
 
@@ -57,10 +60,18 @@ function clipSrc(name: string, isDesktop: boolean) {
 }
 
 export default function Hero() {
+  const navigate = useNavigate()
   const [freeform, setFreeform] = useState(true)
   const [loading, setLoading] = useState(false)
   const [activePromptIndex, setActivePromptIndex] = useState(0)
   const [promptText, setPromptText] = useState(SAMPLE_PROMPTS[0].prompt)
+  const [travelerDescription, setTravelerDescription] = useState('')
+  const [destination, setDestination] = useState('')
+  const [vibe, setVibe] = useState('')
+  const [timing, setTiming] = useState('')
+  const [wantsDestinationSuggestion, setWantsDestinationSuggestion] = useState(false)
+  const [clarification, setClarification] = useState('')
+  const [checkingDetails, setCheckingDetails] = useState(false)
   const [promptVisible, setPromptVisible] = useState(true)
   const [activeClipName, setActiveClipName] = useState(VIDEO_CLIPS[0])
   const [videoReady, setVideoReady] = useState(false)
@@ -114,6 +125,42 @@ export default function Hero() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handleGenerate = async () => {
+    setCheckingDetails(true)
+    setClarification('')
+
+    const tripInput: TripPreflightInput = {
+      mode: freeform ? 'freeform' : 'guided',
+      naturalLanguage: freeform ? promptText : undefined,
+      travelerDescription: freeform ? undefined : travelerDescription,
+      destination: freeform ? undefined : destination,
+      vibe: freeform ? undefined : vibe,
+      timing: freeform ? undefined : timing,
+      wantsDestinationSuggestion: freeform ? undefined : wantsDestinationSuggestion,
+    }
+
+    const result = await validateTripRequest(tripInput)
+
+    if (!result.ready) {
+      setCheckingDetails(false)
+      setClarification(
+        result.question ||
+          'Please add who is traveling, the vibe or type of trip, when you want to travel, and where you want to go.'
+      )
+      return
+    }
+
+    sessionStorage.setItem('voya:trip-preflight', JSON.stringify(result))
+    sessionStorage.setItem('voya:trip-input', JSON.stringify(tripInput))
+    setCheckingDetails(false)
+    setLoading(true)
+
+    const discovery = await discoverRestaurantsAndActivities(tripInput, result)
+
+    sessionStorage.setItem('voya:trip-discovery', JSON.stringify(discovery))
+    navigate('/itinerary')
+  }
 
   return (
     <>
@@ -202,7 +249,11 @@ export default function Hero() {
                 className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-base leading-relaxed placeholder:text-white/20 resize-none h-20 transition-opacity duration-200"
                 style={{ opacity: promptVisible ? 1 : 0 }}
                 value={promptText}
-                onChange={e => { setPromptText(e.target.value); setActivePromptIndex(-1) }}
+                onChange={e => {
+                  setPromptText(e.target.value)
+                  setActivePromptIndex(-1)
+                  setClarification('')
+                }}
               />
             </div>
           ) : (
@@ -226,12 +277,17 @@ export default function Hero() {
                 <textarea
                   className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-lg leading-relaxed placeholder:text-white/20 resize-none h-20"
                   placeholder="Describe your group..."
+                  value={travelerDescription}
+                  onChange={e => {
+                    setTravelerDescription(e.target.value)
+                    setClarification('')
+                  }}
                 />
                 <div className="h-px bg-white/20 w-full" />
               </div>
 
               <div className="space-y-8 md:space-y-10">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
                   <div className="space-y-3">
                     <label className="text-[10px] uppercase tracking-[0.3em] font-bold text-white/50 block">
                       Where to?
@@ -241,8 +297,26 @@ export default function Hero() {
                         type="text"
                         className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-lg placeholder:text-white/20"
                         placeholder="Anywhere in the world..."
+                        value={destination}
+                        onChange={e => {
+                          setDestination(e.target.value)
+                          setWantsDestinationSuggestion(false)
+                          setClarification('')
+                        }}
                       />
-                      <button className="text-[#D4AF37] text-[10px] uppercase tracking-widest font-bold whitespace-nowrap hover:text-white transition-colors border border-[#D4AF37]/30 px-3 py-1 rounded-full">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDestination('')
+                          setWantsDestinationSuggestion(true)
+                          setClarification('')
+                        }}
+                        className={`text-[10px] uppercase tracking-widest font-bold whitespace-nowrap transition-colors border px-3 py-1 rounded-full ${
+                          wantsDestinationSuggestion
+                            ? 'bg-[#D4AF37] border-[#D4AF37] text-[#001e40]'
+                            : 'text-[#D4AF37] hover:text-white border-[#D4AF37]/30'
+                        }`}
+                      >
                         Surprise Me
                       </button>
                     </div>
@@ -257,6 +331,28 @@ export default function Hero() {
                       type="text"
                       className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-lg placeholder:text-white/20"
                       placeholder="e.g. romantic, adventure..."
+                      value={vibe}
+                      onChange={e => {
+                        setVibe(e.target.value)
+                        setClarification('')
+                      }}
+                    />
+                    <div className="h-px bg-white/20 w-full" />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] uppercase tracking-[0.3em] font-bold text-white/50 block">
+                      When?
+                    </label>
+                    <input
+                      type="text"
+                      className="font-headline w-full bg-transparent border-none p-0 focus:ring-0 focus:outline-none text-white text-lg placeholder:text-white/20"
+                      placeholder="e.g. May, summer..."
+                      value={timing}
+                      onChange={e => {
+                        setTiming(e.target.value)
+                        setClarification('')
+                      }}
                     />
                     <div className="h-px bg-white/20 w-full" />
                   </div>
@@ -265,11 +361,28 @@ export default function Hero() {
             </div>
           )}
 
+          {clarification && (
+            <div
+              role="alert"
+              className="rounded-xl border border-[#D4AF37]/40 bg-[#001e40]/45 px-4 py-3 text-left text-sm text-white"
+            >
+              {clarification}
+            </div>
+          )}
+
           <div className="flex justify-center pt-1">
-            <button onClick={() => setLoading(true)} className="gold-btn-glow bg-white text-[#001e40] hover:bg-[#D4AF37] hover:text-white transition-colors duration-300 px-6 py-2.5 rounded-full font-bold text-xs tracking-[0.2em] uppercase flex items-center gap-2 group">
-              Generate My Itinerary
-              <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-1">
-                auto_awesome
+            <button
+              onClick={handleGenerate}
+              disabled={checkingDetails}
+              className="gold-btn-glow bg-white text-[#001e40] hover:bg-[#D4AF37] hover:text-white disabled:opacity-70 disabled:hover:bg-white disabled:hover:text-[#001e40] transition-colors duration-300 px-6 py-2.5 rounded-full font-bold text-xs tracking-[0.2em] uppercase flex items-center gap-2 group"
+            >
+              {checkingDetails ? 'Checking Details' : 'Generate My Itinerary'}
+              <span
+                className={`material-symbols-outlined text-base transition-transform ${
+                  checkingDetails ? 'animate-spin' : 'group-hover:translate-x-1'
+                }`}
+              >
+                {checkingDetails ? 'progress_activity' : 'auto_awesome'}
               </span>
             </button>
           </div>

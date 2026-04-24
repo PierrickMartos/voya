@@ -1,14 +1,4 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-
 export default function LoadingScreen() {
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    const t = setTimeout(() => navigate('/itinerary'), 2000)
-    return () => clearTimeout(t)
-  }, [navigate])
-
   return (
     <div className="fixed inset-0 z-50 overflow-hidden font-body">
       {/* Immersive background */}

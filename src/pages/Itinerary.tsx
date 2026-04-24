@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import type { Itinerary } from '../types/trip'
+import type { DiscoveryItem, TripDiscoveryResult } from '../lib/llmlayer'
 
 // ─── Mock data (Amalfi Coast — will be replaced by AI response) ───────────────
 const MOCK: Itinerary = {
@@ -302,6 +303,128 @@ const MOCK_ROME: Itinerary = {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
+function readTripDiscovery(): TripDiscoveryResult | null {
+  try {
+    const stored = sessionStorage.getItem('voya:trip-discovery')
+    if (!stored) return null
+
+    const parsed = JSON.parse(stored) as Partial<TripDiscoveryResult>
+
+    return {
+      restaurants: Array.isArray(parsed.restaurants) ? parsed.restaurants : [],
+      activities: Array.isArray(parsed.activities) ? parsed.activities : [],
+    }
+  } catch {
+    return null
+  }
+}
+
+function DiscoveryCard({ item }: { item: DiscoveryItem }) {
+  return (
+    <article className="bg-white rounded-xl border border-[#c3c6d1]/20 p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <h3 className="font-headline text-2xl text-[#001e40] leading-tight">{item.name}</h3>
+        {item.priceRange && (
+          <span className="shrink-0 rounded-full bg-[#fed65b]/30 px-3 py-1 text-xs font-bold text-[#745c00]">
+            {item.priceRange}
+          </span>
+        )}
+      </div>
+
+      <p className="text-sm leading-relaxed text-[#43474f] mb-4">{item.description}</p>
+      <p className="text-sm leading-relaxed text-[#001e40] bg-[#f8f9fa] rounded-lg p-4 mb-4">
+        {item.whyItMatches}
+      </p>
+
+      <div className="flex flex-wrap gap-2 text-xs font-bold text-[#737780]">
+        {item.location && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#edeeef] px-3 py-1.5">
+            <span className="material-symbols-outlined text-sm">location_on</span>
+            {item.location}
+          </span>
+        )}
+        {item.bestFor && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#edeeef] px-3 py-1.5">
+            <span className="material-symbols-outlined text-sm">stars</span>
+            {item.bestFor}
+          </span>
+        )}
+        {item.sourceUrl && (
+          <a
+            href={item.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 rounded-full bg-[#001e40] px-3 py-1.5 text-white"
+          >
+            <span className="material-symbols-outlined text-sm">open_in_new</span>
+            Source
+          </a>
+        )}
+      </div>
+    </article>
+  )
+}
+
+function DiscoveryList({
+  title,
+  icon,
+  items,
+}: {
+  title: string
+  icon: string
+  items: DiscoveryItem[]
+}) {
+  return (
+    <div>
+      <div className="mb-6 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#001e40] text-white">
+          <span className="material-symbols-outlined text-xl">{icon}</span>
+        </span>
+        <h2 className="font-headline text-4xl text-[#001e40]">{title}</h2>
+      </div>
+
+      {items.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {items.map((item, index) => (
+            <DiscoveryCard key={`${item.name}-${index}`} item={item} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-[#c3c6d1] bg-white/60 p-6 text-sm text-[#737780]">
+          No results returned yet.
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LLMLayerDiscoverySection({ discovery }: { discovery: TripDiscoveryResult | null }) {
+  return (
+    <section className="py-24 px-8 md:px-20 max-w-screen-2xl mx-auto">
+      <div className="mb-12">
+        <p className="font-label uppercase tracking-widest text-[#735c00] font-bold text-sm mb-3">
+          Live LLMLayer Results
+        </p>
+        <h2 className="font-headline text-5xl text-[#001e40] mb-4">Restaurants & Activities</h2>
+        <p className="text-[#43474f] max-w-2xl">
+          These are the live discovery results generated from the qualified trip brief, shown before the current mock itinerary.
+        </p>
+      </div>
+
+      {discovery ? (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+          <DiscoveryList title="Restaurants" icon="restaurant" items={discovery.restaurants} />
+          <DiscoveryList title="Activities" icon="local_activity" items={discovery.activities} />
+        </div>
+      ) : (
+        <div className="rounded-xl bg-white border border-[#c3c6d1]/20 p-8 text-[#43474f]">
+          Waiting for LLMLayer discovery results...
+        </div>
+      )}
+    </section>
+  )
+}
+
 function EditorialHero({
   itinerary,
   blurred,
@@ -574,12 +697,28 @@ export default function ItineraryPage() {
   const [searchParams] = useSearchParams()
   const itinerary = searchParams.get('dest') === 'rome' ? MOCK_ROME : MOCK
   const [antiSpoiler, setAntiSpoiler] = useState(false)
+  const [discovery, setDiscovery] = useState<TripDiscoveryResult | null>(() => readTripDiscovery())
+
+  useEffect(() => {
+    if (discovery) return undefined
+
+    const interval = window.setInterval(() => {
+      const nextDiscovery = readTripDiscovery()
+      if (!nextDiscovery) return
+
+      setDiscovery(nextDiscovery)
+      window.clearInterval(interval)
+    }, 500)
+
+    return () => window.clearInterval(interval)
+  }, [discovery])
 
   return (
     <div className="bg-[#f8f9fa] min-h-screen">
       <Header variant="explore" />
       <main className="pt-20">
         <EditorialHero itinerary={itinerary} blurred={antiSpoiler} onToggleBlur={() => setAntiSpoiler(v => !v)} />
+        <LLMLayerDiscoverySection discovery={discovery} />
         <DayTimeline itinerary={itinerary} blurred={antiSpoiler} />
         <CuratedSection itinerary={itinerary} blurred={antiSpoiler} />
         <LogisticsSection itinerary={itinerary} />
