@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type SyntheticEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import type { Itinerary } from '../types/trip'
@@ -319,49 +319,152 @@ function readTripDiscovery(): TripDiscoveryResult | null {
   }
 }
 
+function readGeneratedItinerary(): Itinerary | null {
+  try {
+    const stored = sessionStorage.getItem('voya:itinerary')
+    if (!stored) return null
+
+    const parsed = JSON.parse(stored) as Partial<Itinerary>
+
+    if (
+      !parsed.destination ||
+      !parsed.subtitle ||
+      typeof parsed.duration !== 'number' ||
+      !Array.isArray(parsed.days)
+    ) {
+      return null
+    }
+
+    return parsed as Itinerary
+  } catch {
+    return null
+  }
+}
+
 function DiscoveryCard({ item }: { item: DiscoveryItem }) {
   return (
-    <article className="bg-white rounded-xl border border-[#c3c6d1]/20 p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <h3 className="font-headline text-2xl text-[#001e40] leading-tight">{item.name}</h3>
-        {item.priceRange && (
-          <span className="shrink-0 rounded-full bg-[#fed65b]/30 px-3 py-1 text-xs font-bold text-[#745c00]">
-            {item.priceRange}
-          </span>
-        )}
-      </div>
+    <article className="bg-white rounded-xl border border-[#c3c6d1]/20 overflow-hidden shadow-sm">
+      {item.imageUrl && (
+        <img
+          src={item.imageUrl}
+          alt={item.name}
+          className="h-44 w-full object-cover"
+          loading="lazy"
+        />
+      )}
 
-      <p className="text-sm leading-relaxed text-[#43474f] mb-4">{item.description}</p>
-      <p className="text-sm leading-relaxed text-[#001e40] bg-[#f8f9fa] rounded-lg p-4 mb-4">
-        {item.whyItMatches}
-      </p>
+      <div className="p-6">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <h3 className="font-headline text-2xl text-[#001e40] leading-tight">{item.name}</h3>
+        </div>
 
-      <div className="flex flex-wrap gap-2 text-xs font-bold text-[#737780]">
-        {item.location && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#edeeef] px-3 py-1.5">
-            <span className="material-symbols-outlined text-sm">location_on</span>
-            {item.location}
-          </span>
-        )}
-        {item.bestFor && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#edeeef] px-3 py-1.5">
-            <span className="material-symbols-outlined text-sm">stars</span>
-            {item.bestFor}
-          </span>
-        )}
-        {item.sourceUrl && (
-          <a
-            href={item.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 rounded-full bg-[#001e40] px-3 py-1.5 text-white"
-          >
-            <span className="material-symbols-outlined text-sm">open_in_new</span>
-            Source
-          </a>
-        )}
+        <p className="text-sm leading-relaxed text-[#43474f] mb-4">{item.description}</p>
+        <p className="text-sm leading-relaxed text-[#001e40] bg-[#f8f9fa] rounded-lg p-4 mb-4">
+          {item.whyItMatches}
+        </p>
+
+        <div className="flex flex-wrap gap-2 text-xs font-bold text-[#737780]">
+          {typeof item.rating === 'number' && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#fed65b]/30 px-3 py-1.5 text-[#745c00]">
+              <span className="material-symbols-outlined text-sm">star</span>
+              {item.rating.toFixed(1)}
+              {typeof item.ratingCount === 'number' && (
+                <span className="text-[#745c00]/70">({item.ratingCount.toLocaleString()})</span>
+              )}
+            </span>
+          )}
+          {item.priceRange && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#fed65b]/30 px-3 py-1.5 text-[#745c00]">
+              {item.priceRange}
+            </span>
+          )}
+          {item.location && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#edeeef] px-3 py-1.5">
+              <span className="material-symbols-outlined text-sm">location_on</span>
+              {item.location}
+            </span>
+          )}
+          {item.bestFor && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#edeeef] px-3 py-1.5">
+              <span className="material-symbols-outlined text-sm">stars</span>
+              {item.bestFor}
+            </span>
+          )}
+          {item.mapUrl && (
+            <a
+              href={item.mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-full bg-[#001e40] px-3 py-1.5 text-white"
+            >
+              <span className="material-symbols-outlined text-sm">location_on</span>
+              Google Maps
+            </a>
+          )}
+          {item.sourceUrl && (
+            <a
+              href={item.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-full bg-[#edeeef] px-3 py-1.5 text-[#737780]"
+            >
+              <span className="material-symbols-outlined text-sm">open_in_new</span>
+              Source
+            </a>
+          )}
+        </div>
       </div>
     </article>
+  )
+}
+
+function fallbackImageUrl(itinerary: Itinerary, index = 0) {
+  return MOCK.days[index % MOCK.days.length]?.imageUrl || itinerary.heroImageUrl || ''
+}
+
+function handleImageError(event: SyntheticEvent<HTMLImageElement>, fallbackUrl: string) {
+  const image = event.currentTarget
+
+  if (!fallbackUrl || image.src === fallbackUrl) {
+    image.style.display = 'none'
+    return
+  }
+
+  image.src = fallbackUrl
+}
+
+function PlaceLink({
+  href,
+  icon,
+  label,
+  className,
+}: {
+  href?: string
+  icon: string
+  label: string
+  className: string
+}) {
+  if (!href) return null
+
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <span className="material-symbols-outlined text-sm">{icon}</span>
+      {label}
+    </a>
+  )
+}
+
+function PlaceRating({ rating, ratingCount }: { rating?: number; ratingCount?: number }) {
+  if (typeof rating !== 'number') return null
+
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fed65b]/25 px-3 py-1.5 text-xs font-bold text-[#745c00]">
+      <span className="material-symbols-outlined text-sm">star</span>
+      {rating.toFixed(1)}
+      {typeof ratingCount === 'number' && (
+        <span className="text-[#745c00]/70">({ratingCount.toLocaleString()} ratings)</span>
+      )}
+    </span>
   )
 }
 
@@ -443,7 +546,8 @@ function EditorialHero({
           <img
             src={itinerary.heroImageUrl}
             alt={itinerary.destination}
-                  className={`w-full h-full object-cover transition-all duration-500 ${blurred ? 'blur-md scale-105' : ''}`}
+            onError={(event) => handleImageError(event, fallbackImageUrl(itinerary))}
+            className={`w-full h-full object-cover transition-all duration-500 ${blurred ? 'blur-md scale-105' : ''}`}
           />
         )}
       </div>
@@ -523,6 +627,7 @@ function DayTimeline({ itinerary, blurred }: { itinerary: Itinerary; blurred: bo
                 <img
                   src={day.imageUrl}
                   alt={day.title}
+                  onError={(event) => handleImageError(event, fallbackImageUrl(itinerary, i))}
                   className={`w-full aspect-[3/4] object-cover rounded-xl shadow-lg transition-all duration-500 ${blurred ? 'blur-md scale-[1.02]' : 'group-hover:scale-[1.02]'}`}
                 />
               )}
@@ -562,6 +667,7 @@ function CuratedSection({ itinerary, blurred }: { itinerary: Itinerary; blurred:
                   <img
                     src={itinerary.sight.imageUrl}
                     alt={itinerary.sight.name}
+                    onError={(event) => handleImageError(event, fallbackImageUrl(itinerary, 1))}
                     className={`w-full h-full object-cover transition-all duration-500 ${blurred ? 'blur-md scale-105' : 'group-hover:scale-105'}`}
                   />
                 </div>
@@ -570,16 +676,23 @@ function CuratedSection({ itinerary, blurred }: { itinerary: Itinerary; blurred:
                     Must-See Sight
                   </span>
                   <h3 className="font-headline text-4xl text-[#001e40] mb-6">{itinerary.sight.name}</h3>
+                  <div className="mb-5">
+                    <PlaceRating rating={itinerary.sight.rating} ratingCount={itinerary.sight.ratingCount} />
+                  </div>
                   <p className="text-[#43474f] mb-8 leading-relaxed">{itinerary.sight.description}</p>
                   <div className="flex gap-3 flex-wrap">
-                    <button className="px-5 py-2.5 border border-[#c3c6d1]/30 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-[#f8f9fa] transition-colors">
-                      <span className="material-symbols-outlined text-sm">location_on</span>
-                      Google Maps
-                    </button>
-                    <button className="px-5 py-2.5 border border-[#c3c6d1]/30 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-[#f8f9fa] transition-colors">
-                      <span className="material-symbols-outlined text-sm">language</span>
-                      Website
-                    </button>
+                    <PlaceLink
+                      href={itinerary.sight.mapUrl}
+                      icon="location_on"
+                      label="Google Maps"
+                      className="px-5 py-2.5 border border-[#c3c6d1]/30 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-[#f8f9fa] transition-colors"
+                    />
+                    <PlaceLink
+                      href={itinerary.sight.websiteUrl}
+                      icon="language"
+                      label="Website"
+                      className="px-5 py-2.5 border border-[#c3c6d1]/30 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-[#f8f9fa] transition-colors"
+                    />
                   </div>
                 </div>
               </div>
@@ -592,22 +705,30 @@ function CuratedSection({ itinerary, blurred }: { itinerary: Itinerary; blurred:
               <img
                 src={itinerary.dining.imageUrl}
                 alt={itinerary.dining.name}
+                onError={(event) => handleImageError(event, fallbackImageUrl(itinerary, 2))}
                 className={`w-full aspect-video object-cover rounded-lg mb-6 transition-all duration-500 ${blurred ? 'blur-md' : ''}`}
               />
               <span className="text-xs font-bold text-[#735c00] uppercase tracking-tighter mb-2 block">
                 Iconic Dining
               </span>
               <h3 className="font-headline text-3xl text-[#001e40] mb-4">{itinerary.dining.name}</h3>
+              <div className="mb-4">
+                <PlaceRating rating={itinerary.dining.rating} ratingCount={itinerary.dining.ratingCount} />
+              </div>
               <p className="text-sm text-[#43474f] mb-6 leading-relaxed">{itinerary.dining.description}</p>
               <div className="flex flex-col gap-3">
-                <button className="w-full py-3 bg-[#f8f9fa] border border-[#c3c6d1]/30 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#edeeef] transition-colors">
-                  <span className="material-symbols-outlined text-sm">restaurant</span>
-                  Reserve Table
-                </button>
-                <button className="w-full py-3 border border-[#c3c6d1]/30 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#f8f9fa] transition-colors">
-                  <span className="material-symbols-outlined text-sm">location_on</span>
-                  Map Directions
-                </button>
+                <PlaceLink
+                  href={itinerary.dining.websiteUrl}
+                  icon="restaurant"
+                  label="Reserve Table"
+                  className="w-full py-3 bg-[#f8f9fa] border border-[#c3c6d1]/30 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#edeeef] transition-colors"
+                />
+                <PlaceLink
+                  href={itinerary.dining.mapUrl}
+                  icon="location_on"
+                  label="Map Directions"
+                  className="w-full py-3 border border-[#c3c6d1]/30 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#f8f9fa] transition-colors"
+                />
               </div>
             </div>
           )}
@@ -620,22 +741,32 @@ function CuratedSection({ itinerary, blurred }: { itinerary: Itinerary; blurred:
                   Ultimate Stay
                 </span>
                 <h3 className="font-headline text-5xl mb-6">{itinerary.stay.name}</h3>
+                <div className="mb-6">
+                  <PlaceRating rating={itinerary.stay.rating} ratingCount={itinerary.stay.ratingCount} />
+                </div>
                 <p className="text-white/80 mb-8 text-lg leading-relaxed font-headline italic">
                   {itinerary.stay.quote}
                 </p>
                 <div className="flex gap-4 flex-wrap">
-                  <button className="px-8 py-4 bg-[#fed65b] text-[#745c00] rounded-xl font-bold hover:brightness-110 transition-all">
-                    Book The Experience
-                  </button>
-                  <button className="px-8 py-4 bg-white/10 backdrop-blur rounded-xl font-bold hover:bg-white/20 transition-all border border-white/20">
-                    Official Gallery
-                  </button>
+                  <PlaceLink
+                    href={itinerary.stay.websiteUrl}
+                    icon="language"
+                    label="Book The Experience"
+                    className="px-8 py-4 bg-[#fed65b] text-[#745c00] rounded-xl font-bold hover:brightness-110 transition-all flex items-center gap-2"
+                  />
+                  <PlaceLink
+                    href={itinerary.stay.mapUrl}
+                    icon="location_on"
+                    label="Google Maps"
+                    className="px-8 py-4 bg-white/10 backdrop-blur rounded-xl font-bold hover:bg-white/20 transition-all border border-white/20 flex items-center gap-2"
+                  />
                 </div>
               </div>
               <div className="md:w-1/2 h-72 md:h-auto">
                 <img
                   src={itinerary.stay.imageUrl}
                   alt={itinerary.stay.name}
+                  onError={(event) => handleImageError(event, fallbackImageUrl(itinerary, 3))}
                   className={`w-full h-full object-cover transition-all duration-500 ${blurred ? 'blur-md scale-105' : ''}`}
                 />
               </div>
@@ -695,7 +826,7 @@ function LogisticsSection({ itinerary }: { itinerary: Itinerary }) {
 
 export default function ItineraryPage() {
   const [searchParams] = useSearchParams()
-  const itinerary = searchParams.get('dest') === 'rome' ? MOCK_ROME : MOCK
+  const itinerary = readGeneratedItinerary() || (searchParams.get('dest') === 'rome' ? MOCK_ROME : MOCK)
   const [antiSpoiler, setAntiSpoiler] = useState(false)
   const [discovery, setDiscovery] = useState<TripDiscoveryResult | null>(() => readTripDiscovery())
 

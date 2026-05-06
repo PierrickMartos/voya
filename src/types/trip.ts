@@ -21,6 +21,8 @@ export interface Activity {
   imageUrl?: string
   mapUrl?: string
   websiteUrl?: string
+  rating?: number
+  ratingCount?: number
 }
 
 export interface Day {
@@ -39,9 +41,9 @@ export interface Itinerary {
   heroImageUrl?: string
   heroQuote?: { text: string; author: string }
   days: Day[]
-  sight?: { name: string; description: string; imageUrl?: string }
-  dining?: { name: string; description: string; imageUrl?: string }
-  stay?: { name: string; quote: string; imageUrl?: string }
+  sight?: { name: string; description: string; imageUrl?: string; mapUrl?: string; websiteUrl?: string; rating?: number; ratingCount?: number }
+  dining?: { name: string; description: string; imageUrl?: string; mapUrl?: string; websiteUrl?: string; rating?: number; ratingCount?: number }
+  stay?: { name: string; quote: string; imageUrl?: string; mapUrl?: string; websiteUrl?: string; rating?: number; ratingCount?: number }
   logistics?: Array<{ icon: string; label: string }>
   bestTime?: { months: string; reason: string }
   generalTips: string[]

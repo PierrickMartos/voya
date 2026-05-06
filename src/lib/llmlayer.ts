@@ -1,4 +1,6 @@
 import type { TripPreflightInput, TripPreflightResult } from './tripPreflight'
+import { readLocalCache, writeLocalCache } from './localCache'
+import { inferTripDuration } from './tripDuration'
 
 export type DiscoveryKind = 'restaurants' | 'activities'
 
@@ -10,6 +12,10 @@ export interface DiscoveryItem {
   priceRange?: string
   bestFor?: string
   sourceUrl?: string
+  imageUrl?: string
+  mapUrl?: string
+  rating?: number
+  ratingCount?: number
 }
 
 export interface TripDiscoveryResult {
@@ -19,7 +25,18 @@ export interface TripDiscoveryResult {
 
 interface LLMLayerAnswerResponse {
   answer?: string | { items?: DiscoveryItem[] }
+  images?: LLMLayerImage[]
 }
+
+interface LLMLayerImage {
+  imageUrl?: string
+  thumbnailUrl?: string
+  title?: string
+  source?: string
+  link?: string
+}
+
+const LLMLAYER_CACHE_NAMESPACE = 'llmlayer:discovery:v3'
 
 const DISCOVERY_SCHEMA = {
   type: 'object',
@@ -64,6 +81,18 @@ function logDiscoveryItems(kind: DiscoveryKind, items: DiscoveryItem[]) {
   console.info(`[llmlayer] Normalized ${kind} items:`, items)
 }
 
+function logDiscoveryCacheHit(kind: DiscoveryKind, items: DiscoveryItem[]) {
+  if (!import.meta.env.DEV) return
+
+  console.info(`[llmlayer] Using cached ${kind} items:`, items)
+}
+
+function logDiscoveryImages(kind: DiscoveryKind, images: LLMLayerImage[] | undefined) {
+  if (!import.meta.env.DEV) return
+
+  console.info(`[llmlayer] ${kind} images:`, images ?? [])
+}
+
 function buildTripContext(input: TripPreflightInput, qualification: TripPreflightResult) {
   return {
     originalInput: input,
@@ -84,20 +113,31 @@ function buildDiscoveryPrompt(
   qualification: TripPreflightResult
 ) {
   const target = kind === 'restaurants' ? 'restaurants and food stops' : 'activities and experiences'
+  const duration = inferTripDuration(input)
+  const targetCount = kind === 'restaurants'
+    ? Math.min(12, Math.max(3, duration))
+    : Math.min(16, Math.max(4, duration * 2))
 
   return `
 Find current ${target} for this qualified travel brief.
 
+Return exactly ${targetCount} strong options for a ${duration}-day stay.
+
 Return options that fit every signal the user shared: destination or open-destination request, trip timing, traveler group, ages, budget, vibe, pace, interests, food preferences, accessibility, and anything else present in the brief.
 
 Avoid generic tourist lists. Prefer options that are currently relevant, destination-specific, and defensible from recent web information. If the user asked Voya to choose the destination, choose options in one coherent destination and make that destination clear in the location fields.
+
+Do not include image URLs. The app uses its own image source for visuals.
 
 Qualified trip context:
 ${JSON.stringify(buildTripContext(input, qualification), null, 2)}
 `.trim()
 }
 
-function normalizeDiscoveryItems(answer: LLMLayerAnswerResponse['answer']): DiscoveryItem[] {
+function normalizeDiscoveryItems(
+  answer: LLMLayerAnswerResponse['answer'],
+  _images: LLMLayerImage[] | undefined
+): DiscoveryItem[] {
   if (!answer) return []
 
   const parsed = typeof answer === 'string'
@@ -106,9 +146,15 @@ function normalizeDiscoveryItems(answer: LLMLayerAnswerResponse['answer']): Disc
 
   if (!Array.isArray(parsed.items)) return []
 
-  return parsed.items.filter((item): item is DiscoveryItem => {
-    return Boolean(item?.name && item.description && item.whyItMatches)
-  })
+  return parsed.items
+    .filter((item): item is DiscoveryItem => {
+      return Boolean(item?.name && item.description && item.whyItMatches)
+    })
+    .map((item) => {
+      const normalizedItem = { ...item }
+      delete normalizedItem.imageUrl
+      return normalizedItem
+    })
 }
 
 export async function discoverTripOptions(
@@ -127,6 +173,36 @@ export async function discoverTripOptions(
     return []
   }
 
+  const duration = inferTripDuration(input)
+  const targetCount = kind === 'restaurants'
+    ? Math.min(12, Math.max(3, duration))
+    : Math.min(16, Math.max(4, duration * 2))
+  const requestPayload = {
+    query: buildDiscoveryPrompt(kind, input, qualification),
+    model: 'llmlayer-web',
+    response_language: 'auto',
+    answer_type: 'json',
+    search_type: 'general',
+    json_schema: JSON.stringify(DISCOVERY_SCHEMA),
+    citations: false,
+    return_sources: false,
+    return_images: true,
+    date_filter: 'anytime',
+    max_queries: duration >= 7 ? 3 : 2,
+    max_tokens: Math.min(2600, 900 + targetCount * 140),
+    temperature: 0.2,
+    search_context_size: 'medium',
+  }
+  const cached = readLocalCache<DiscoveryItem[]>(LLMLAYER_CACHE_NAMESPACE, {
+    kind,
+    requestPayload,
+  })
+
+  if (cached) {
+    logDiscoveryCacheHit(kind, cached)
+    return cached
+  }
+
   try {
     const response = await fetch('https://api.llmlayer.dev/api/v2/answer', {
       method: 'POST',
@@ -134,22 +210,7 @@ export async function discoverTripOptions(
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        query: buildDiscoveryPrompt(kind, input, qualification),
-        model: 'llmlayer-web',
-        response_language: 'auto',
-        answer_type: 'json',
-        search_type: 'general',
-        json_schema: JSON.stringify(DISCOVERY_SCHEMA),
-        citations: false,
-        return_sources: false,
-        return_images: false,
-        date_filter: 'anytime',
-        max_queries: 2,
-        max_tokens: 1600,
-        temperature: 0.2,
-        search_context_size: 'medium',
-      }),
+      body: JSON.stringify(requestPayload),
     })
 
     if (!response.ok) {
@@ -165,8 +226,10 @@ export async function discoverTripOptions(
 
     const data = (await response.json()) as LLMLayerAnswerResponse
     logDiscoveryAnswer(kind, data.answer)
+    logDiscoveryImages(kind, data.images)
 
-    const items = normalizeDiscoveryItems(data.answer)
+    const items = normalizeDiscoveryItems(data.answer, data.images)
+    writeLocalCache(LLMLAYER_CACHE_NAMESPACE, { kind, requestPayload }, items)
     logDiscoveryItems(kind, items)
     return items
   } catch (error) {

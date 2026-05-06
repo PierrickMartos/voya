@@ -106,6 +106,6 @@ describe('Hero — CTA', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /generate my itinerary/i }))
 
-    expect(await screen.findByText(/curating your editorial odyssey/i)).toBeInTheDocument()
+    expect(await screen.findByText(/curating your trip/i)).toBeInTheDocument()
   })
 })

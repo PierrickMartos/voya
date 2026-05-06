@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LoadingScreen from './LoadingScreen'
-import { discoverRestaurantsAndActivities } from '../lib/llmlayer'
-import { validateTripRequest, type TripPreflightInput } from '../lib/tripPreflight'
+import { generateItinerary } from '../lib/itinerary'
+import { discoverRestaurantsAndActivities, type TripDiscoveryResult } from '../lib/llmlayer'
+import { enrichDiscoveryWithGooglePlacesImages } from '../lib/googleMaps'
+import { readLocalCache, writeLocalCache } from '../lib/localCache'
+import { validateTripRequest, type TripPreflightInput, type TripPreflightResult } from '../lib/tripPreflight'
+import { getDestinationCoverImage } from '../lib/unsplash'
+import type { Itinerary } from '../types/trip'
 
 const VIDEO_CLIPS = [
   '146632-789534284',
@@ -36,6 +41,17 @@ const PIXABAY_AUTHORS: Record<string, string> = {
 
 const PLAY_DURATION = 8000  // ms each clip plays before fading
 const FADE_DURATION = 1500  // ms crossfade duration
+const MIN_LOADING_SCREEN_MS = 1_500
+const GENERATED_TRIP_CACHE_NAMESPACE = 'generated-trip:v2'
+const GOOGLE_PLACES_ENRICHMENT_TIMEOUT_MS = 4_000
+
+interface CachedGeneratedTrip {
+  input: TripPreflightInput
+  preflight: TripPreflightResult
+  discovery: TripDiscoveryResult
+  itinerary: Itinerary
+  coverImageUrl?: string
+}
 
 const SAMPLE_PROMPTS = [
   {
@@ -55,8 +71,83 @@ const SAMPLE_PROMPTS = [
   },
 ]
 
+const LOADING_MESSAGES = {
+  qualifying: {
+    label: 'Reading your travel brief',
+    detail: 'Confirming the essentials before building the itinerary.',
+  },
+  discovery: {
+    label: 'Finding current recommendations',
+    detail: 'Looking for restaurants, activities, and local highlights that fit your trip.',
+  },
+  cover: {
+    label: 'Setting the scene',
+    detail: 'Bringing in a destination cover while recommendations continue in the background.',
+  },
+  places: {
+    label: 'Checking places',
+    detail: 'Matching restaurants and activities to Google Maps for photos, ratings, and links.',
+  },
+  itinerary: {
+    label: 'Composing the itinerary',
+    detail: 'Organizing the route into a polished day-by-day journey.',
+  },
+}
+
 function clipSrc(name: string, isDesktop: boolean) {
   return `${import.meta.env.BASE_URL}videos/homepage/${name}_${isDesktop ? 'medium' : 'tiny'}.mp4`
+}
+
+function getCoverDestination(input: TripPreflightInput, result: TripPreflightResult) {
+  if (result.wantsDestinationSuggestion && !result.destination) return ''
+
+  return result.destination?.trim() || input.destination?.trim() || ''
+}
+
+function waitForNextTask() {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 0)
+  })
+}
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
+}
+
+async function waitForMinimumLoadingTime(startedAt: number) {
+  const remaining = MIN_LOADING_SCREEN_MS - (Date.now() - startedAt)
+
+  if (remaining > 0) {
+    await wait(remaining)
+  }
+}
+
+function logTripStage(stage: string, startedAt: number) {
+  if (!import.meta.env.DEV) return
+
+  console.info(`[hero] ${stage} finished in ${Math.round(performance.now() - startedAt)}ms`)
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T, label: string) {
+  return Promise.race([
+    promise,
+    wait(timeoutMs).then(() => {
+      if (import.meta.env.DEV) {
+        console.warn(`[hero] ${label} timed out after ${timeoutMs}ms; continuing without it.`)
+      }
+      return fallback
+    }),
+  ])
+}
+
+function generatedTripCachePayload(input: TripPreflightInput) {
+  return {
+    task: 'complete_trip_generation',
+    version: GENERATED_TRIP_CACHE_NAMESPACE,
+    input,
+  }
 }
 
 export default function Hero() {
@@ -72,6 +163,8 @@ export default function Hero() {
   const [wantsDestinationSuggestion, setWantsDestinationSuggestion] = useState(false)
   const [clarification, setClarification] = useState('')
   const [checkingDetails, setCheckingDetails] = useState(false)
+  const [loadingCoverImageUrl, setLoadingCoverImageUrl] = useState<string>()
+  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES.qualifying)
   const [promptVisible, setPromptVisible] = useState(true)
   const [activeClipName, setActiveClipName] = useState(VIDEO_CLIPS[0])
   const [videoReady, setVideoReady] = useState(false)
@@ -111,6 +204,15 @@ export default function Hero() {
     timerRef.current = setTimeout(() => fadeToNext(nextSlot), PLAY_DURATION)
   }
 
+  const stopVideoRotation = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+
+    videoRefs.forEach((ref) => ref.current?.pause())
+  }
+
   useEffect(() => {
     const startIndex = Math.floor(Math.random() * VIDEO_CLIPS.length)
     clipIndexRef.current = startIndex
@@ -128,6 +230,8 @@ export default function Hero() {
 
   const handleGenerate = async () => {
     setCheckingDetails(true)
+    setLoadingCoverImageUrl(undefined)
+    setLoadingMessage(LOADING_MESSAGES.qualifying)
     setClarification('')
 
     const tripInput: TripPreflightInput = {
@@ -140,7 +244,31 @@ export default function Hero() {
       wantsDestinationSuggestion: freeform ? undefined : wantsDestinationSuggestion,
     }
 
+    const cachedTrip = readLocalCache<CachedGeneratedTrip>(
+      GENERATED_TRIP_CACHE_NAMESPACE,
+      generatedTripCachePayload(tripInput)
+    )
+
+    if (cachedTrip) {
+      sessionStorage.setItem('voya:trip-preflight', JSON.stringify(cachedTrip.preflight))
+      sessionStorage.setItem('voya:trip-input', JSON.stringify(cachedTrip.input))
+      sessionStorage.setItem('voya:trip-discovery', JSON.stringify(cachedTrip.discovery))
+      sessionStorage.setItem('voya:itinerary', JSON.stringify(cachedTrip.itinerary))
+      setCheckingDetails(false)
+      stopVideoRotation()
+      setLoading(true)
+      setLoadingMessage(LOADING_MESSAGES.itinerary)
+      setLoadingCoverImageUrl(cachedTrip.coverImageUrl || cachedTrip.itinerary.heroImageUrl)
+      const loadingStartedAt = Date.now()
+      await waitForNextTask()
+      await waitForMinimumLoadingTime(loadingStartedAt)
+      navigate('/itinerary')
+      return
+    }
+
+    const preflightStartedAt = performance.now()
     const result = await validateTripRequest(tripInput)
+    logTripStage('preflight', preflightStartedAt)
 
     if (!result.ready) {
       setCheckingDetails(false)
@@ -151,20 +279,90 @@ export default function Hero() {
       return
     }
 
+    const coverDestination = getCoverDestination(tripInput, result)
+    const coverImagePromise = coverDestination
+      ? getDestinationCoverImage(coverDestination)
+      : Promise.resolve(undefined)
+
+    if (coverDestination) {
+      await waitForNextTask()
+    }
+
     sessionStorage.setItem('voya:trip-preflight', JSON.stringify(result))
     sessionStorage.setItem('voya:trip-input', JSON.stringify(tripInput))
     setCheckingDetails(false)
+    stopVideoRotation()
     setLoading(true)
+    const loadingStartedAt = Date.now()
+    setLoadingMessage(coverDestination ? LOADING_MESSAGES.cover : LOADING_MESSAGES.discovery)
+    await waitForNextTask()
 
-    const discovery = await discoverRestaurantsAndActivities(tripInput, result)
+    void coverImagePromise.then((coverImage) => {
+      if (coverImage?.url) {
+        setLoadingCoverImageUrl(coverImage.url)
+        setLoadingMessage(LOADING_MESSAGES.cover)
+      }
+    }).catch((reason) => {
+      console.log(reason);
+    });
+
+    setLoadingMessage(LOADING_MESSAGES.discovery)
+    const discoveryPromise = (async () => {
+      const discoveryStartedAt = performance.now()
+      const discovery = await discoverRestaurantsAndActivities(tripInput, result)
+      logTripStage('discovery', discoveryStartedAt)
+
+      setLoadingMessage(LOADING_MESSAGES.places)
+      const placesStartedAt = performance.now()
+      const enrichedDiscovery = await withTimeout(
+        enrichDiscoveryWithGooglePlacesImages(discovery, result),
+        GOOGLE_PLACES_ENRICHMENT_TIMEOUT_MS,
+        discovery,
+        'Google Places enrichment'
+      )
+      logTripStage('places', placesStartedAt)
+      return enrichedDiscovery
+    })()
+    const [discovery, coverImage] = await Promise.all([discoveryPromise, coverImagePromise])
+
+    if (coverImage?.url) {
+      setLoadingCoverImageUrl(coverImage.url)
+      setLoadingMessage(LOADING_MESSAGES.cover)
+      await waitForNextTask()
+    }
+
+    setLoadingMessage(LOADING_MESSAGES.itinerary)
+    const itineraryStartedAt = performance.now()
+    const itinerary = await generateItinerary(tripInput, result, discovery, coverImage)
+    logTripStage('itinerary', itineraryStartedAt)
 
     sessionStorage.setItem('voya:trip-discovery', JSON.stringify(discovery))
+    sessionStorage.setItem('voya:itinerary', JSON.stringify(itinerary))
+    writeLocalCache<CachedGeneratedTrip>(
+      GENERATED_TRIP_CACHE_NAMESPACE,
+      generatedTripCachePayload(tripInput),
+      {
+        input: tripInput,
+        preflight: result,
+        discovery,
+        itinerary,
+        coverImageUrl: coverImage?.url,
+      }
+    )
+
+    await waitForMinimumLoadingTime(loadingStartedAt)
     navigate('/itinerary')
   }
 
   return (
     <>
-    {loading && <LoadingScreen />}
+    {loading && (
+      <LoadingScreen
+        coverImageUrl={loadingCoverImageUrl}
+        progressLabel={loadingMessage.label}
+        progressDetail={loadingMessage.detail}
+      />
+    )}
     <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
       <div className="absolute inset-0 z-0">
         {/* Poster image — fades out once the first video is ready */}

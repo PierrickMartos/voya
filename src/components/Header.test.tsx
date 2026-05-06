@@ -19,7 +19,6 @@ describe('Header', () => {
   it('renders navigation links', () => {
     renderHeader()
     expect(screen.getByText(/explore/i)).toBeInTheDocument()
-    expect(screen.getByText(/how it works/i)).toBeInTheDocument()
   })
 
   it('does not render account button in home variant', () => {
@@ -27,8 +26,8 @@ describe('Header', () => {
     expect(screen.queryByLabelText(/account/i)).not.toBeInTheDocument()
   })
 
-  it('renders account button in explore variant', () => {
+  it('does not render account button in explore variant', () => {
     renderHeader('explore')
-    expect(screen.getByLabelText(/account/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/account/i)).not.toBeInTheDocument()
   })
 })

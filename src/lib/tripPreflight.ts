@@ -1,3 +1,5 @@
+import { readLocalCache, writeLocalCache } from './localCache'
+
 export interface TripPreflightInput {
   mode: 'freeform' | 'guided'
   naturalLanguage?: string
@@ -32,6 +34,9 @@ interface OpenRouterChatResponse {
   }>
 }
 
+const OPENROUTER_PREFLIGHT_CACHE_NAMESPACE = 'openrouter:trip-preflight:v2'
+const pendingPreflightRequests = new Map<string, Promise<TripPreflightResult>>()
+
 const PREFLIGHT_SCHEMA = {
   type: 'object',
   properties: {
@@ -59,6 +64,7 @@ const PREFLIGHT_SCHEMA = {
     'vibeKnown',
     'timingKnown',
     'destinationKnown',
+    'destination',
     'wantsDestinationSuggestion',
     'missingFields',
   ],
@@ -82,6 +88,8 @@ Rules:
 - Set vibeKnown=true when travel style, budget level, pace, interests, or trip type is clear.
 - Set timingKnown=true when exact dates, a month, a season, a holiday period, "this weekend", "next summer", or explicit flexibility is present.
 - Set destinationKnown=true only when a real destination, region, country, city, or route is supplied.
+- When destinationKnown=true, set destination to the exact destination, region, country, city, or route from the user's request.
+- When destinationKnown=false, set destination to an empty string.
 - Set wantsDestinationSuggestion=true when the user explicitly asks the assistant to find or choose the location.
 - Include "destination" in missingFields only when destinationKnown=false and wantsDestinationSuggestion=false.
 - ready is true only when travelerKnown, vibeKnown, timingKnown, and either destinationKnown or wantsDestinationSuggestion are true.
@@ -170,6 +178,23 @@ const TIMING_WORDS = [
   'winter',
 ]
 
+const DESTINATION_PREPOSITIONS = [
+  'across',
+  'around',
+  'explore',
+  'exploring',
+  'in',
+  'near',
+  'through',
+  'to',
+  'visit',
+  'visiting',
+]
+
+function normalizeString(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 function logPreflightFallback(reason: string, detail?: unknown) {
   if (!import.meta.env.DEV) return
 
@@ -180,6 +205,22 @@ function logPreflightSuccess(result: TripPreflightResult) {
   if (!import.meta.env.DEV) return
 
   console.info('[tripPreflight] OpenRouter qualification succeeded:', result)
+}
+
+function logPreflightCacheHit(result: TripPreflightResult) {
+  if (!import.meta.env.DEV) return
+
+  console.info('[tripPreflight] Using cached OpenRouter qualification:', result)
+}
+
+function preflightCachePayload(input: TripPreflightInput) {
+  return {
+    provider: 'openrouter',
+    task: 'trip_preflight',
+    model: 'meta-llama/llama-3.3-70b-instruct',
+    promptVersion: OPENROUTER_PREFLIGHT_CACHE_NAMESPACE,
+    input,
+  }
 }
 
 function textFromInput(input: TripPreflightInput) {
@@ -199,9 +240,29 @@ function hasAny(text: string, words: string[]) {
   return words.some((word) => new RegExp(`\\b${word}\\b`, 'i').test(text))
 }
 
-function hasDestination(input: TripPreflightInput, text: string) {
-  if (input.destination?.trim()) return true
-  if (hasAny(text, DESTINATION_WORDS)) return true
+function toTitleCase(value: string) {
+  return value.replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
+}
+
+function cleanDestinationCandidate(candidate: string) {
+  const cleaned = candidate
+    .replace(/[,.!?;:]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (!cleaned) return ''
+  if (TIMING_WORDS.includes(cleaned.toLowerCase())) return ''
+
+  return cleaned
+}
+
+function extractKnownDestination(input: TripPreflightInput, text: string) {
+  const explicitDestination = normalizeString(input.destination)
+  if (explicitDestination) return explicitDestination
+
+  const knownDestination = DESTINATION_WORDS.find((word) => new RegExp(`\\b${word}\\b`, 'i').test(text))
+  if (knownDestination) return toTitleCase(knownDestination)
+
   const originalText = [
     input.naturalLanguage,
     input.travelerDescription,
@@ -211,16 +272,22 @@ function hasDestination(input: TripPreflightInput, text: string) {
   ]
     .filter(Boolean)
     .join(' ')
-  const placeMatches = originalText.matchAll(/\b(?:in|to|around|through)\s+([A-Z][A-Za-z]+)/g)
+  const placeMatches = originalText.matchAll(
+    new RegExp(
+      `\\b(?:${DESTINATION_PREPOSITIONS.join('|')})\\s+((?:the\\s+)?[A-Z][A-Za-z'-]*(?:\\s+(?:[A-Z][A-Za-z'-]*|of|the|and|&))*)` +
+        `(?=\\s+(?:with|for|on|during|next|this|from|to|in|around|through|near|by|because|when|where|who|and\\s+(?:my|our|the))|[,.!?;:]|$)`,
+      'g'
+    )
+  )
 
   for (const match of placeMatches) {
-    const candidate = match[1]?.toLowerCase()
-    if (candidate && !TIMING_WORDS.includes(candidate)) {
-      return true
+    const candidate = cleanDestinationCandidate(match[1] ?? '')
+    if (candidate) {
+      return candidate
     }
   }
 
-  return false
+  return ''
 }
 
 function buildQuestion(missingFields: TripPreflightResult['missingFields']) {
@@ -239,7 +306,8 @@ function localPreflight(input: TripPreflightInput): TripPreflightResult {
   const travelerKnown = Boolean(input.travelerDescription?.trim()) || hasAny(text, TRAVELER_WORDS)
   const vibeKnown = Boolean(input.vibe?.trim()) || hasAny(text, VIBE_WORDS)
   const timingKnown = Boolean(input.timing?.trim()) || hasAny(text, TIMING_WORDS) || /\b(?:20\d{2}|next|this)\s+(?:week|weekend|month|spring|summer|fall|autumn|winter)\b/i.test(text) || /\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b/.test(text)
-  const destinationKnown = hasDestination(input, text)
+  const destination = extractKnownDestination(input, text)
+  const destinationKnown = Boolean(destination)
   const wantsDestinationSuggestion =
     Boolean(input.wantsDestinationSuggestion) || hasAny(text, SUGGESTION_WORDS)
   const hasAges = /\b(?:age|ages|aged)\s+\d|\b\d{1,2}\s*(?:years old|yo|y\/o)\b/i.test(text)
@@ -257,6 +325,7 @@ function localPreflight(input: TripPreflightInput): TripPreflightResult {
     vibeKnown,
     timingKnown,
     destinationKnown,
+    destination,
     wantsDestinationSuggestion,
     missingFields,
     question: missingFields.length > 0 ? buildQuestion(missingFields) : undefined,
@@ -271,26 +340,53 @@ function normalizePreflightResult(answer: unknown, fallback: TripPreflightResult
   }
 
   const result = parsed as Partial<TripPreflightResult>
+  const travelerKnown = Boolean(result.travelerKnown)
+  const vibeKnown = Boolean(result.vibeKnown)
+  const timingKnown = Boolean(result.timingKnown)
+  const destination = normalizeString(result.destination) || fallback.destination
+  const wantsDestinationSuggestion = Boolean(result.wantsDestinationSuggestion)
+  const destinationKnown = Boolean((result.destinationKnown || fallback.destinationKnown) && destination)
   const missingFields = Array.isArray(result.missingFields)
     ? result.missingFields.filter((field): field is 'traveler' | 'vibe' | 'destination' | 'timing' =>
         field === 'traveler' || field === 'vibe' || field === 'destination' || field === 'timing'
       )
     : fallback.missingFields
+  const normalizedMissingFields = new Set(missingFields)
+
+  if (!travelerKnown) normalizedMissingFields.add('traveler')
+  else normalizedMissingFields.delete('traveler')
+
+  if (!vibeKnown) normalizedMissingFields.add('vibe')
+  else normalizedMissingFields.delete('vibe')
+
+  if (!timingKnown) normalizedMissingFields.add('timing')
+  else normalizedMissingFields.delete('timing')
+
+  if (!destinationKnown && !wantsDestinationSuggestion) normalizedMissingFields.add('destination')
+  else normalizedMissingFields.delete('destination')
+
+  const nextMissingFields = Array.from(normalizedMissingFields)
+  const ready =
+    travelerKnown &&
+    vibeKnown &&
+    timingKnown &&
+    (destinationKnown || wantsDestinationSuggestion) &&
+    nextMissingFields.length === 0
 
   return {
-    ready: Boolean(result.ready),
-    travelerKnown: Boolean(result.travelerKnown),
+    ready,
+    travelerKnown,
     travelerSummary: result.travelerSummary,
     hasAges: Boolean(result.hasAges),
-    vibeKnown: Boolean(result.vibeKnown),
+    vibeKnown,
     vibeSummary: result.vibeSummary,
-    timingKnown: Boolean(result.timingKnown),
+    timingKnown,
     timingSummary: result.timingSummary,
-    destinationKnown: Boolean(result.destinationKnown),
-    destination: result.destination,
-    wantsDestinationSuggestion: Boolean(result.wantsDestinationSuggestion),
-    missingFields,
-    question: result.question || (missingFields.length > 0 ? buildQuestion(missingFields) : undefined),
+    destinationKnown,
+    destination,
+    wantsDestinationSuggestion,
+    missingFields: nextMissingFields,
+    question: result.question || (nextMissingFields.length > 0 ? buildQuestion(nextMissingFields) : undefined),
   }
 }
 
@@ -307,6 +403,37 @@ export async function validateTripRequest(input: TripPreflightInput): Promise<Tr
     return fallback
   }
 
+  const requestPayload = {
+    model: 'meta-llama/llama-3.3-70b-instruct',
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: JSON.stringify(input) },
+    ],
+    response_format: {
+      type: 'json_schema',
+      json_schema: {
+        name: 'trip_preflight',
+        strict: true,
+        schema: PREFLIGHT_SCHEMA,
+      },
+    },
+    max_tokens: 500,
+    temperature: 0,
+  }
+  const cachePayload = preflightCachePayload(input)
+  const cached = readLocalCache<TripPreflightResult>(OPENROUTER_PREFLIGHT_CACHE_NAMESPACE, cachePayload)
+
+  if (cached) {
+    logPreflightCacheHit(cached)
+    return cached
+  }
+
+  const pendingCacheKey = JSON.stringify(cachePayload)
+  const pending = pendingPreflightRequests.get(pendingCacheKey)
+
+  if (pending) return pending
+
+  const request = (async () => {
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -316,23 +443,7 @@ export async function validateTripRequest(input: TripPreflightInput): Promise<Tr
         'HTTP-Referer': window.location.origin,
         'X-OpenRouter-Title': 'Voya',
       },
-      body: JSON.stringify({
-        model: 'openai/gpt-oss-120b:free',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: JSON.stringify(input) },
-        ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'trip_preflight',
-            strict: true,
-            schema: PREFLIGHT_SCHEMA,
-          },
-        },
-        max_tokens: 500,
-        temperature: 0,
-      }),
+      body: JSON.stringify(requestPayload),
     })
 
     if (!response.ok) {
@@ -348,10 +459,20 @@ export async function validateTripRequest(input: TripPreflightInput): Promise<Tr
 
     const data = (await response.json()) as OpenRouterChatResponse
     const result = normalizePreflightResult(data.choices?.[0]?.message?.content, fallback)
+    writeLocalCache(OPENROUTER_PREFLIGHT_CACHE_NAMESPACE, cachePayload, result)
     logPreflightSuccess(result)
     return result
   } catch (error) {
     logPreflightFallback('OpenRouter request or parsing failed', error)
     return fallback
+  }
+  })()
+
+  pendingPreflightRequests.set(pendingCacheKey, request)
+
+  try {
+    return await request
+  } finally {
+    pendingPreflightRequests.delete(pendingCacheKey)
   }
 }
